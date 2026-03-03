@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Dan Poudyal — Mortgage Assistant</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --bg:#ffffff;
+  --surface:#f4f4f4;
+  --surface2:#ebebeb;
+  --border:#e5e5e5;
+  --text:#0d0d0d;
+  --text-muted:#8e8ea0;
+  --orange:#e8621a;
+  --orange2:#f07030;
+  --user-bg:#f4f4f4;
+  --bot-bg:transparent;
+}
+
+html,body{
+  height:100%;
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+
+/* ── LAYOUT ── */
+.app{
+  display:flex;flex-direction:column;
+  height:100svh;
+  height:100vh;
+  max-width:780px;
+  margin:0 auto;
+}
+
+/* ── HEADER ── */
+.header{
+  flex-shrink:0;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);
+}
+
+.header-left{display:flex;align-items:center;gap:10px}
+.header-dot{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--orange2),var(--orange));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:white;font-family:'Inter',sans-serif;
+  flex-shrink:0;
+}
+.header-title{font-size:15px;font-weight:600;color:var(--text)}
+.header-sub{font-size:12px;color:var(--text-muted);margin-top:1px;display:flex;align-items:center;gap:5px}
+.online-dot{width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0}
+.header-btn{
+  background:var(--orange);color:white;
+  padding:8px 16px;border-radius:8px;
+  font-size:13px;font-weight:600;text-decoration:none;
+  font-family:'Inter',sans-serif;white-space:nowrap;
+  flex-shrink:0;
+}
+
+/* -- PROGRESS BAR -- */
+.progress-bar{
+  flex-shrink:0;
+  padding:7px 20px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+}
+.progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.progress-label{font-size:11px;color:var(--text-muted);font-weight:500}
+.progress-pct{font-size:11px;color:var(--orange);font-weight:600}
+.progress-track{height:3px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:3px;transition:width 0.6s ease;width:0%}
+
+/* -- MESSAGES -- */
+.msgs{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:24px 20px 12px;
+  display:flex;flex-direction:column;gap:0;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+.msgs::-webkit-scrollbar{width:4px}
+.msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* message rows */
+.msg{
+  display:flex;gap:12px;
+  padding:14px 0;
+  animation:fadeIn 0.2s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.msg.bot{align-items:flex-start}
+.msg.user{align-items:flex-start;flex-direction:row-reverse}
+
+.msg-av{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:13px;font-weight:600;
+  margin-top:2px;
+}
+.msg.bot .msg-av{
+  background:linear-gradient(135deg,var(--orange2),var(--orange));
+  color:white;font-size:12px;
+}
+.msg.user .msg-av{
+  background:var(--surface2);
+  color:var(--text-muted);font-size:11px;
+}
+
+.msg-body{
+  flex:1;min-width:0;
+  font-size:15px;line-height:1.7;color:var(--text);
+  padding-top:4px;
+}
+.msg.user .msg-body{
+  background:#f4f4f4;
+  padding:10px 16px;border-radius:12px;
+  font-size:14px;flex:0 1 auto;max-width:75%;color:#0d0d0d;
+}
+
+/* typing indicator */
+.typing-row{display:flex;gap:12px;padding:14px 0;align-items:flex-start}
+.typing-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--orange2),var(--orange));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;flex-shrink:0;margin-top:2px}
+.typing-dots{display:flex;gap:4px;align-items:center;padding-top:10px}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--text-muted);animation:blink 1.4s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.3;transform:scale(0.8)}30%{opacity:1;transform:scale(1)}}
+
+/* ── STARTERS ── */
+.starters{
+  flex-shrink:0;
+  padding:0 20px 16px;
+}
+.starters-label{font-size:12px;color:var(--text-muted);margin-bottom:10px;font-weight:500}
+.starters-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.starter{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+  font-size:13px;font-weight:500;color:var(--text);
+  cursor:pointer;text-align:left;
+  transition:border-color 0.15s,background 0.15s;
+  line-height:1.4;font-family:'Inter',sans-serif;
+  -webkit-appearance:none;
+}
+.starter:hover{border-color:var(--orange);background:var(--surface2)}
+.starter-icon{display:block;font-size:18px;margin-bottom:6px}
+
+/* ── LEAD GATE ── */
+.gate{
+  flex-shrink:0;
+  margin:0 20px 12px;
+  background:#f9f9f9;
+  border:1px solid var(--border);
+  border-radius:12px;padding:18px;
+}
+.gate-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+.gate-sub{font-size:13px;color:var(--text-muted);margin-bottom:14px}
+.gate-row{display:flex;gap:8px;margin-bottom:8px}
+.gate-inp{
+  flex:1;min-width:0;
+  background:#ffffff;border:1px solid var(--border);
+  border-radius:8px;padding:10px 13px;
+  font-size:14px;font-family:'Inter',sans-serif;color:var(--text);
+  outline:none;-webkit-appearance:none;
+}
+.gate-inp:focus{border-color:var(--orange)}
+.gate-inp::placeholder{color:var(--text-muted)}
+.gate-btn{
+  width:100%;background:var(--orange);color:white;
+  border:none;border-radius:8px;padding:12px;
+  font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;-webkit-appearance:none;
+  transition:background 0.15s;
+}
+.gate-btn:hover{background:var(--orange2)}
+.gate-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px}
+
+/* ── INPUT BAR ── */
+.input-area{
+  flex-shrink:0;
+  padding:10px 20px;
+  padding-bottom:max(10px, env(safe-area-inset-bottom));
+  background:var(--bg);
+  border-top:1px solid var(--border);
+}
+.input-wrap{
+  display:flex;align-items:flex-end;gap:10px;
+  background:#f4f4f4;
+  border:1px solid var(--border);
+  border-radius:12px;padding:10px 14px;
+  transition:border-color 0.15s;
+}
+.input-wrap:focus-within{border-color:var(--orange)}
+.inp{
+  flex:1;background:none;border:none;outline:none;
+  font-size:15px;font-family:'Inter',sans-serif;color:var(--text);
+  resize:none;max-height:120px;line-height:1.5;
+  -webkit-appearance:none;
+}
+.inp::placeholder{color:var(--text-muted)}
+.inp:disabled{opacity:0.4;cursor:not-allowed}
+.send-btn{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  background:var(--orange);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s;-webkit-appearance:none;
+  align-self:flex-end;
+}
+.send-btn:hover{background:var(--orange2)}
+.send-btn:disabled{opacity:0.35;cursor:not-allowed}
+.send-btn svg{width:16px;height:16px;fill:white;margin-left:1px}
+.input-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px}
+
+/* ── MOBILE ── */
+@media(max-width:480px){
+  .header{padding:12px 16px}
+  .msgs{padding:16px 14px 8px}
+  .starters{padding:0 14px 12px}
+  .starters-grid{grid-template-columns:1fr 1fr;gap:7px}
+  .starter{font-size:12.5px;padding:10px 12px}
+  .input-area{padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+  .gate{margin:0 14px 10px}
+  .msg-body{font-size:14px}
+  .gate-inp,.inp{font-size:16px!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-dot">D</div>
+      <div>
+        <div class="header-title">Dan Poudyal — Mortgage Assistant</div>
+        <div class="header-sub"><div class="online-dot"></div>Online · Instant answers · Free service</div>
+      </div>
+    </div>
+    <a class="header-btn" href="tel:0433362754">Call Dan</a>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar">
+    <div class="progress-row">
+      <span class="progress-label" id="pg-label">Ask your first question to get started</span>
+      <span class="progress-pct" id="pg-pct"></span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="pg-fill"></div>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="msgs" id="msgs"></div>
+
+  <!-- STARTERS -->
+  <div class="starters" id="starters">
+    <div class="starters-label">What would you like to know?</div>
+    <div class="starters-grid" id="starters-grid">
+      <button class="starter" data-q="How much can I borrow?"><span class="starter-icon">💰</span>How much can I borrow?</button>
+      <button class="starter" data-q="I'm self-employed — can I get a loan?"><span class="starter-icon">🧾</span>I'm self-employed</button>
+      <button class="starter" data-q="I'm on parental leave — can I borrow?"><span class="starter-icon">👶</span>I'm on parental leave</button>
+      <button class="starter" data-q="I got knocked back by my bank"><span class="starter-icon">❌</span>Got knocked back</button>
+      <button class="starter" data-q="I'm a first home buyer, where do I start?"><span class="starter-icon">🏠</span>First home buyer</button>
+      <button class="starter" data-q="I want to refinance my home loan"><span class="starter-icon">🔄</span>Refinancing</button>
+    </div>
+  </div>
+
+  <!-- LEAD GATE (hidden initially) -->
+  <div class="gate" id="gate" style="display:none">
+    <div class="gate-title">Get your full answer</div>
+    <div class="gate-sub">Leave your details and Dan will follow up personally — free, no obligation.</div>
+    <div class="gate-row">
+      <input class="gate-inp" id="g-name" type="text" placeholder="First name" autocomplete="given-name"/>
+      <input class="gate-inp" id="g-email" type="email" placeholder="Email" autocomplete="email"/>
+    </div>
+    <input class="gate-inp" id="g-phone" type="tel" placeholder="Phone (optional)" autocomplete="tel" style="width:100%;margin-bottom:10px"/>
+    <button class="gate-btn" id="gate-btn">Send me the full answer</button>
+    <div class="gate-note">🔒 Private · Never shared · Zero spam</div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-area" id="input-area">
+    <div class="input-wrap">
+      <input class="inp" id="inp" type="text" placeholder="Ask anything about home loans..." autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="send"/>
+      <button class="send-btn" id="send-btn">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="input-note">Dan Poudyal · Platinum Mortgage Broker · Melbourne · 40+ lenders · Free service</div>
+  </div>
+
+</div>
+
+<script>
+var WORKER = 'https://mortgage-ai.danisadj.workers.dev';
+var BIZ = 'Broker: Dan Poudyal, Platinum Mortgage Broker, Melbourne Australia. Phone: 0433 362 754. Email: dan@thinkandgrowfinance.com.au. Specialises in complex income lending: self-employed, ABN contractors, parental leave returnees, knocked-back clients. 40+ lender panel. Free service to clients.';
+
+var state = {
+  msgs: [],
+  qc: 0,
+  done: false,
+  name: '',
+  phase: 'idle' // idle | chat | gate | done
+};
+var GATE = 3;
+
+function setP(pct, label) {
+  var fill = document.getElementById('pg-fill');
+  var lbl = document.getElementById('pg-label');
+  var pctEl = document.getElementById('pg-pct');
+  if (fill) fill.style.width = pct + '%';
+  if (lbl) lbl.textContent = label;
+  if (pctEl) pctEl.textContent = pct > 0 ? pct + '%' : '';
+}
+
+/* ── HELPERS ── */
+function scrollBottom() {
+  var m = document.getElementById('msgs');
+  m.scrollTop = m.scrollHeight;
+}
+
+function addBotMsg(text) {
+  var m = document.getElementById('msgs');
+  var row = document.createElement('div');
+  row.className = 'msg bot';
+  var safe = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n/g,'<br>');
+  row.innerHTML = '<div class="msg-av">D</div><div class="msg-body">' + safe + '</div>';
+  m.appendChild(row);
+  scrollBottom();
+}
+
+function addUserMsg(text) {
+  var m = document.getElementById('msgs');
+  var row = document.createElement('div');
+  row.className = 'msg user';
+  row.innerHTML = '<div class="msg-av">You</div><div class="msg-body">' + text + '</div>';
+  m.appendChild(row);
+  scrollBottom();
+}
+
+function showTyping() {
+  var m = document.getElementById('msgs');
+  if (document.getElementById('typing')) return;
+  var row = document.createElement('div');
+  row.className = 'typing-row';
+  row.id = 'typing';
+  row.innerHTML = '<div class="typing-av">D</div><div class="typing-dots"><span></span><span></span><span></span></div>';
+  m.appendChild(row);
+  scrollBottom();
+}
+
+function hideTyping() {
+  var t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+function setDis(d) {
+  document.getElementById('inp').disabled = d;
+  document.getElementById('send-btn').disabled = d;
+}
+
+function hideStarters() {
+  document.getElementById('starters').style.display = 'none';
+}
+
+function showGate() {
+  document.getElementById('gate').style.display = 'block';
+  setDis(true);
+  document.getElementById('g-name').focus();
+  scrollBottom();
+}
+
+/* ── AI CALL ── */
+function callAI(msgs, teaser, captured) {
+  return fetch(WORKER, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: msgs,
+      businessContext: BIZ,
+      teaserMode: teaser || false,
+      leadCaptured: captured || false,
+      leadName: state.name
+    })
+  })
+  .then(function(res) {
+    return res.json();
+  })
+  .then(function(d) {
+    if (d && d.content && d.content[0] && d.content[0].text) {
+      return d.content[0].text;
+    }
+    return null;
+  })
+  .catch(function(err) {
+    return 'Sorry, having trouble connecting right now. Please call Dan directly on 0433 362 754.';
+  });
+}
+
+/* ── PROCESS MESSAGE ── */
+function process(text) {
+  if (state.phase === 'gate') return;
+
+  hideStarters();
+  addUserMsg(text);
+  state.msgs.push({ role: 'user', content: text });
+  state.qc++;
+  state.phase = 'chat';
+
+  var teaser = (state.qc >= GATE && !state.done);
+
+  if (!teaser) {
+    setP(Math.min(15 + state.qc * 15, 70), 'Thinking...');
+  } else {
+    setP(80, 'Almost there...');
+  }
+
+  showTyping();
+  callAI(state.msgs, teaser, false).then(function(reply) {
+    hideTyping();
+    if (!reply) return;
+    addBotMsg(reply);
+    state.msgs.push({ role: 'assistant', content: reply });
+
+    if (teaser) {
+      setP(85, 'One last step...');
+      setTimeout(showGate, 400);
+    } else {
+      setP(Math.min(25 + state.qc * 15, 70), 'Here to help');
+    }
+  });
+}
+
+/* ── SEND ── */
+function doSend() {
+  var inp = document.getElementById('inp');
+  var text = inp.value.trim();
+  if (!text || state.phase === 'gate') return;
+  inp.value = '';
+  process(text);
+}
+
+/* ── LEAD SUBMIT ── */
+function submitLead() {
+  var n = document.getElementById('g-name').value.trim();
+  var e = document.getElementById('g-email').value.trim();
+  var p = document.getElementById('g-phone').value.trim();
+
+  if (!n) { document.getElementById('g-name').focus(); return; }
+  if (!e || e.indexOf('@') === -1) { document.getElementById('g-email').focus(); return; }
+
+  state.done = true;
+  state.name = n;
+  state.phase = 'done';
+
+  document.getElementById('gate').style.display = 'none';
+  setDis(false);
+
+  state.msgs.push({ role: 'user', content: 'My name is ' + n + ', email ' + e + (p ? ', phone ' + p : '') + '. Please give me the full detailed answer now.' });
+
+  setP(92, 'Preparing your full answer...');
+  showTyping();
+  callAI(state.msgs, false, true).then(function(reply) {
+    hideTyping();
+    if (reply) {
+      addBotMsg(reply);
+      state.msgs.push({ role: 'assistant', content: reply });
+    }
+    setP(100, 'Complete');
+    setTimeout(function() {
+      addBotMsg('Thanks ' + n + '! Dan will be in touch soon. You can also call him directly on 0433 362 754 to chat now.');
+    }, 1200);
+  });
+}
+
+/* ── WIRE UP ── */
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Starter buttons
+  document.getElementById('starters-grid').addEventListener('click', function(e) {
+    var btn = e.target.closest('.starter');
+    if (!btn) return;
+    var q = btn.getAttribute('data-q');
+    if (q) process(q);
+  });
+
+  // Send button
+  document.getElementById('send-btn').addEventListener('click', function() {
+    doSend();
+  });
+
+  // Enter key
+  document.getElementById('inp').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      doSend();
+    }
+  });
+
+  // Gate submit
+  document.getElementById('gate-btn').addEventListener('click', function() {
+    submitLead();
+  });
+
+  // Gate enter key
+  ['g-name','g-email','g-phone'].forEach(function(id) {
+    document.getElementById(id).addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') submitLead();
+    });
+  });
+
+});
+</script>
+</body>
+</html>
