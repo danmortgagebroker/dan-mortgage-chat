@@ -438,10 +438,17 @@ function addBotMsg(text) {
   var row = document.createElement('div');
   row.className = 'msg bot';
 
-  // Split on citation block separator ---
-  var parts = text.split(/\n---\n/);
+  // Split on citation block separator --- (handles with or without surrounding newlines)
+  var parts = text.split(/\n?---\n?/);
   var mainText = parts[0];
   var citationText = parts.length > 1 ? parts.slice(1).join('\n---\n') : null;
+
+  // Also check for "Sources used" without --- separator
+  if (!citationText && mainText.indexOf('Sources used') !== -1) {
+    var srcIdx = mainText.indexOf('Sources used');
+    citationText = mainText.slice(srcIdx);
+    mainText = mainText.slice(0, srcIdx).trim();
+  }
 
   function formatText(t) {
     return t
