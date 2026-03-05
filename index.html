@@ -276,12 +276,12 @@ html,body{
   <div class="starters" id="starters">
     <div class="starters-label">What would you like to know?</div>
     <div class="starters-grid" id="starters-grid">
-      <button class="starter" data-q="How much can I borrow?"><span class="starter-icon">💰</span>How much can I borrow?</button>
-      <button class="starter" data-q="I'm self-employed — can I get a loan?"><span class="starter-icon">🧾</span>I'm self-employed</button>
-      <button class="starter" data-q="I'm on parental leave — can I borrow?"><span class="starter-icon">👶</span>I'm on parental leave</button>
-      <button class="starter" data-q="I got knocked back by my bank"><span class="starter-icon">❌</span>Got knocked back</button>
-      <button class="starter" data-q="I'm a first home buyer, where do I start?"><span class="starter-icon">🏠</span>First home buyer</button>
-      <button class="starter" data-q="I want to refinance my home loan"><span class="starter-icon">🔄</span>Refinancing</button>
+      <button class="starter" data-q="How much can I borrow?" data-module="FIRST_HOME_BUYER"><span class="starter-icon">💰</span>How much can I borrow?</button>
+      <button class="starter" data-q="I'm self-employed — can I get a loan?" data-module="SELF_EMPLOYED"><span class="starter-icon">🧾</span>I'm self-employed</button>
+      <button class="starter" data-q="I'm on parental leave — can I borrow?" data-module="PARENTAL_LEAVE"><span class="starter-icon">👶</span>I'm on parental leave</button>
+      <button class="starter" data-q="I got knocked back by my bank" data-module="KNOCKED_BACK"><span class="starter-icon">❌</span>Got knocked back</button>
+      <button class="starter" data-q="I'm a first home buyer, where do I start?" data-module="FIRST_HOME_BUYER"><span class="starter-icon">🏠</span>First home buyer</button>
+      <button class="starter" data-q="I want to refinance my home loan" data-module="REFINANCER"><span class="starter-icon">🔄</span>Refinancing</button>
     </div>
   </div>
 
@@ -320,9 +320,86 @@ var state = {
   qc: 0,
   done: false,
   name: '',
-  phase: 'idle' // idle | chat | gate | done
+  email: '',
+  phone: '',
+  module: 'FIRST_HOME_BUYER',
+  lastIntent: 'low',
+  log: [],          // full conversation log for D1 storage
+  phase: 'idle'     // idle | chat | gate | done
 };
-var GATE = 3;
+
+// ── INTENT DETECTION — runs client-side before every API call ──
+function detectIntent(text) {
+  var t = text.toLowerCase();
+
+  var highSignals = [
+    /\$[\d,]+/,
+    /\d+k\b/,
+    /earn(ing)?\s+\d/,
+    /income.{0,20}\d/,
+    /salary.{0,20}\d/,
+    /looking at.{0,30}(property|house|place|apartment)/,
+    /want to buy.{0,30}(in|at|near)/,
+    /found (a |the )?(property|house|place)/,
+    /settlement/,
+    /auction/,
+    /\d+\s*(week|month)s?\s*(time|away|to buy)/,
+    /pre.?approv/,
+    /eligible/,
+    /first home (guarantee|grant)/,
+    /fhbg/,
+    /stamp duty/,
+    /knocked back/,
+    /declined/,
+    /rejected/,
+    /bank said no/,
+    /my (deposit|savings) (is|are)/,
+    /i have \$[\d,]+/,
+    /deposit of/,
+    /how much can i borrow/,
+    /borrowing (capacity|power)/,
+    /serviceability/,
+    /tax return.{0,20}(show|low|lodg)/,
+    /sole trader/,
+    /my business/,
+    /(maternity|parental) leave.{0,30}(borrow|loan|buy)/,
+    /return(ing)? to work/,
+    /investment property/,
+    /negative(ly)? gear/,
+    /equity.{0,20}(access|use|release)/,
+    /current rate.{0,20}(is|of|\d)/,
+    /paying.{0,20}(percent|%|\d)/,
+    /fix(ed)?.{0,20}expir/,
+    /cashback/,
+    /second property/,
+    /refinanc/,
+  ];
+
+  for (var i = 0; i < highSignals.length; i++) {
+    if (highSignals[i].test(t)) return 'high';
+  }
+
+  var mediumSignals = [
+    /how much/,
+    /can i (get|borrow|qualify|afford)/,
+    /do i qualify/,
+    /am i eligible/,
+    /what do i need/,
+    /should i/,
+    /which (lender|bank|loan)/,
+    /my situation/,
+    /help me/,
+    /not sure/,
+    /worried/,
+    /stressed/,
+  ];
+
+  for (var j = 0; j < mediumSignals.length; j++) {
+    if (mediumSignals[j].test(t)) return 'medium';
+  }
+
+  return 'low';
+}
 
 function setP(pct, label) {
   var fill = document.getElementById('pg-fill');
@@ -400,10 +477,11 @@ function callAI(msgs, teaser, captured) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messages: msgs,
-      businessContext: BIZ,
       teaserMode: teaser || false,
       leadCaptured: captured || false,
-      leadName: state.name
+      leadName: state.name,
+      activeModule: state.module,
+      intentSignal: state.lastIntent
     })
   })
   .then(function(res) {
@@ -421,8 +499,11 @@ function callAI(msgs, teaser, captured) {
 }
 
 /* ── PROCESS MESSAGE ── */
-function process(text) {
+function process(text, moduleOverride) {
   if (state.phase === 'gate') return;
+
+  // Set module if starter button specified one
+  if (moduleOverride) state.module = moduleOverride;
 
   hideStarters();
   addUserMsg(text);
@@ -430,22 +511,43 @@ function process(text) {
   state.qc++;
   state.phase = 'chat';
 
-  var teaser = (state.qc >= GATE && !state.done);
+  // Detect intent from what they typed
+  var intent = detectIntent(text);
+  state.lastIntent = intent;
 
-  if (!teaser) {
-    setP(Math.min(15 + state.qc * 15, 70), 'Thinking...');
-  } else {
+  // Log this message
+  state.log.push({ role: 'user', text: text, intent: intent, ts: Date.now() });
+
+  // Gate logic:
+  // HIGH intent  → gate immediately (first question with specific details)
+  // MEDIUM intent → gate after 2nd question
+  // LOW intent   → never gate until q4 fallback (pure education questions)
+  var gateNow = !state.done && (
+    intent === 'high' ||
+    (intent === 'medium' && state.qc >= 2)
+  );
+  // Fallback: gate after 4 questions regardless of intent
+  if (!state.done && state.qc >= 4) gateNow = true;
+
+  if (gateNow) {
     setP(80, 'Almost there...');
+  } else {
+    setP(Math.min(15 + state.qc * 15, 70), 'Thinking...');
   }
 
   showTyping();
-  callAI(state.msgs, teaser, false).then(function(reply) {
+  callAI(state.msgs, gateNow, false).then(function(reply) {
     hideTyping();
     if (!reply) return;
-    addBotMsg(reply);
-    state.msgs.push({ role: 'assistant', content: reply });
 
-    if (teaser) {
+    // Strip any accidental JSON intent tag from AI reply before displaying
+    var clean = reply.replace(/\s*\{"intent"[^}]*\}/g, '').trim();
+
+    addBotMsg(clean);
+    state.msgs.push({ role: 'assistant', content: clean });
+    state.log.push({ role: 'assistant', text: clean, ts: Date.now() });
+
+    if (gateNow) {
       setP(85, 'One last step...');
       setTimeout(showGate, 400);
     } else {
@@ -474,10 +576,25 @@ function submitLead() {
 
   state.done = true;
   state.name = n;
+  state.email = e;
+  state.phone = p;
   state.phase = 'done';
 
   document.getElementById('gate').style.display = 'none';
   setDis(false);
+
+  // Send lead + full conversation log to worker for D1 storage
+  fetch(WORKER, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      logOnly: true,
+      lead: { name: n, email: e, phone: p },
+      module: state.module,
+      log: state.log,
+      ts: new Date().toISOString()
+    })
+  }).catch(function(){});
 
   state.msgs.push({ role: 'user', content: 'My name is ' + n + ', email ' + e + (p ? ', phone ' + p : '') + '. Please give me the full detailed answer now.' });
 
@@ -486,8 +603,9 @@ function submitLead() {
   callAI(state.msgs, false, true).then(function(reply) {
     hideTyping();
     if (reply) {
-      addBotMsg(reply);
-      state.msgs.push({ role: 'assistant', content: reply });
+      var clean = reply.replace(/\s*\{"intent"[^}]*\}/g, '').trim();
+      addBotMsg(clean);
+      state.msgs.push({ role: 'assistant', content: clean });
     }
     setP(100, 'Complete');
     setTimeout(function() {
@@ -504,7 +622,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var btn = e.target.closest('.starter');
     if (!btn) return;
     var q = btn.getAttribute('data-q');
-    if (q) process(q);
+    var mod = btn.getAttribute('data-module');
+    if (q) process(q, mod);
   });
 
   // Send button
