@@ -130,6 +130,17 @@ html,body{
   font-size:14px;flex:0 1 auto;max-width:75%;color:#0d0d0d;
 }
 
+.citation-block{
+  margin-top:10px;
+  padding:10px 12px;
+  background:#f4f4f4;
+  border-left:3px solid var(--orange);
+  border-radius:0 6px 6px 0;
+  font-size:12px;
+  color:var(--text-muted);
+  line-height:1.6;
+}
+
 /* typing indicator */
 .typing-row{display:flex;gap:12px;padding:14px 0;align-items:flex-start}
 .typing-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--orange2),var(--orange));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;flex-shrink:0;margin-top:2px}
@@ -425,11 +436,27 @@ function addBotMsg(text) {
   var m = document.getElementById('msgs');
   var row = document.createElement('div');
   row.className = 'msg bot';
-  var safe = text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\n/g,'<br>');
-  row.innerHTML = '<div class="msg-av">D</div><div class="msg-body">' + safe + '</div>';
+
+  // Split on citation block separator ---
+  var parts = text.split(/\n---\n/);
+  var mainText = parts[0];
+  var citationText = parts.length > 1 ? parts.slice(1).join('\n---\n') : null;
+
+  function formatText(t) {
+    return t
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n/g,'<br>');
+  }
+
+  var html = '<div class="msg-body">' + formatText(mainText);
+
+  if (citationText) {
+    html += '<div class="citation-block">' + formatText(citationText.trim()) + '</div>';
+  }
+
+  html += '</div>';
+  row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
   scrollBottom();
 }
