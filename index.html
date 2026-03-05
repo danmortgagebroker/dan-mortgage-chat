@@ -242,6 +242,7 @@ html,body{
   .gate-inp,.inp{font-size:16px!important}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -313,7 +314,11 @@ html,body{
 
 <script>
 var WORKER = 'https://mortgage-ai.danisadj.workers.dev';
-var BIZ = 'Broker: Dan Poudyal, Platinum Mortgage Broker, Melbourne Australia. Phone: 0433 362 754. Email: dan@thinkandgrowfinance.com.au. Specialises in complex income lending: self-employed, ABN contractors, parental leave returnees, knocked-back clients. 40+ lender panel. Free service to clients.';
+
+// ── EMAILJS CONFIG ──
+var EMAILJS_SERVICE  = 'service_6vsgzsk';
+var EMAILJS_TEMPLATE = 'template_4ji8mkh';
+var EMAILJS_KEY      = 'x1DaBiirFYIVo2PSM';
 
 var state = {
   msgs: [],
@@ -565,7 +570,48 @@ function doSend() {
   process(text);
 }
 
-/* ── LEAD SUBMIT ── */
+/* ── EMAILJS INIT ── */
+(function(){
+  if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_KEY);
+})();
+
+/* ── SEND LEAD EMAIL ── */
+function sendLeadEmail(name, email, phone) {
+  if (typeof emailjs === 'undefined') return;
+
+  // Build readable question list from log
+  var questions = state.log
+    .filter(function(e) { return e.role === 'user'; })
+    .map(function(e, i) { return (i + 1) + '. ' + e.text; })
+    .join('\n');
+
+  var moduleLabel = {
+    FIRST_HOME_BUYER: 'First Home Buyer',
+    SELF_EMPLOYED:    'Self-Employed',
+    INVESTOR:         'Investor',
+    REFINANCER:       'Refinancer',
+    KNOCKED_BACK:     'Knocked Back',
+    PARENTAL_LEAVE:   'Parental Leave'
+  }[state.module] || state.module;
+
+  var intentLabel = {
+    high:   'High — specific details shared',
+    medium: 'Medium — engaged, researching',
+    low:    'Low — general questions'
+  }[state.lastIntent] || state.lastIntent;
+
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+    lead_name:     name,
+    lead_email:    email,
+    lead_phone:    phone || 'Not provided',
+    lead_module:   moduleLabel,
+    lead_intent:   intentLabel,
+    lead_questions: questions || 'No questions recorded',
+    lead_time:     new Date().toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' })
+  }).catch(function(err) {
+    console.error('EmailJS error:', err);
+  });
+}
 function submitLead() {
   var n = document.getElementById('g-name').value.trim();
   var e = document.getElementById('g-email').value.trim();
@@ -583,7 +629,10 @@ function submitLead() {
   document.getElementById('gate').style.display = 'none';
   setDis(false);
 
-  // Send lead + full conversation log to worker for D1 storage
+  // Send email notification with full conversation
+  sendLeadEmail(n, e, p);
+
+  // Send log to Worker (D1 if configured, otherwise silent)
   fetch(WORKER, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
