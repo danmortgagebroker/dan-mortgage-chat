@@ -340,8 +340,9 @@ var state = {
   phone: '',
   module: 'FIRST_HOME_BUYER',
   lastIntent: 'low',
-  log: [],          // full conversation log for D1 storage
-  phase: 'idle'     // idle | chat | gate | done
+  postGateCount: 0,
+  log: [],
+  phase: 'idle'
 };
 
 // ── INTENT DETECTION — runs client-side before every API call ──
@@ -543,23 +544,22 @@ function process(text, moduleOverride) {
   state.qc++;
   state.phase = 'chat';
 
-  // Detect intent from what they typed
+  // Store intent for email logging only — not used for gating anymore
   var intent = detectIntent(text);
   state.lastIntent = intent;
 
   // Log this message
   state.log.push({ role: 'user', text: text, intent: intent, ts: Date.now() });
 
-  // Gate logic:
-  // HIGH intent  → gate immediately (first question with specific details)
-  // MEDIUM intent → gate after 2nd question
-  // LOW intent   → never gate until q4 fallback (pure education questions)
-  var gateNow = !state.done && (
-    intent === 'high' ||
-    (intent === 'medium' && state.qc >= 2)
-  );
-  // Fallback: gate after 4 questions regardless of intent
-  if (!state.done && state.qc >= 4) gateNow = true;
+  // ── GATE LOGIC: show gate after 4th answer ──
+  var gateNow = !state.done && state.qc >= 4;
+
+  // ── POST-GATE LIMIT: stop chat after 2 more exchanges post lead capture ──
+  if (state.done && state.postGateCount >= 2) {
+    addBotMsg("You've covered a lot of ground! For anything more specific, Dan is best placed to help directly. Call him on 0433 362 754 or check your email — he'll be in touch soon.");
+    setDis(true);
+    return;
+  }
 
   if (gateNow) {
     setP(80, 'Almost there...');
@@ -578,6 +578,9 @@ function process(text, moduleOverride) {
     addBotMsg(clean);
     state.msgs.push({ role: 'assistant', content: clean });
     state.log.push({ role: 'assistant', text: clean, ts: Date.now() });
+
+    // Increment post-gate counter
+    if (state.done) state.postGateCount++;
 
     if (gateNow) {
       setP(85, 'One last step...');
