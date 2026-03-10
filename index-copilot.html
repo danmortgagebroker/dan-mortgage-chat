@@ -334,7 +334,8 @@ html,body{
 
 <script>
 // ── COPILOT STUDIO CONFIG ──
-var COPILOT_ENDPOINT = 'https://default95511ce1d1a84cff80c455e45763a0.70.environment.api.powerplatform.com/copilotstudio/dataverse-backed/authenticated/bots/copilots_header_28455/conversations';
+// Unauthenticated endpoint — works for anonymous public users
+var COPILOT_ENDPOINT = 'https://default95511ce1d1a84cff80c455e45763a0.70.environment.api.powerplatform.com/copilotstudio/dataverse-backed/unauthenticated/bots/copilots_header_28455/conversations';
 var COPILOT_API_VERSION = '?api-version=2022-03-01-preview';
 var copilotConversationId = null;
 var copilotToken = null;
@@ -525,14 +526,16 @@ function showGate() {
 }
 
 /* ── COPILOT AI CALL ── */
-// Step 1: Start a new conversation with Copilot Studio and get a conversation ID
 function startCopilotConversation() {
   return fetch(COPILOT_ENDPOINT + COPILOT_API_VERSION, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({})
   })
-  .then(function(res) { return res.json(); })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Failed to start conversation: ' + res.status);
+    return res.json();
+  })
   .then(function(d) {
     copilotConversationId = d.id;
     copilotToken = d.token;
@@ -540,11 +543,30 @@ function startCopilotConversation() {
   });
 }
 
-// Step 2: Send a message to Copilot and poll for the reply
-function sendCopilotMessage(text, conversationId) {
+// Poll for bot reply — retries up to 10 times with 1.5s gap (15s total max)
+function pollForReply(conversationId, afterActivityId, attempts) {
+  attempts = attempts || 0;
+  if (attempts > 10) return Promise.resolve(null);
+
   var activityUrl = COPILOT_ENDPOINT + '/' + conversationId + '/activities' + COPILOT_API_VERSION;
 
-  // Send the user message as a Copilot activity
+  return fetch(activityUrl)
+  .then(function(res) { return res.json(); })
+  .then(function(d) {
+    var activities = (d.activities || []).filter(function(a) {
+      return a.type === 'message' && a.from && a.from.role === 'bot';
+    });
+    if (activities.length > 0) {
+      return activities[activities.length - 1].text || null;
+    }
+    // No reply yet — wait 1.5s and try again
+    return new Promise(function(resolve) { setTimeout(resolve, 1500); })
+      .then(function() { return pollForReply(conversationId, afterActivityId, attempts + 1); });
+  });
+}
+
+function sendCopilotMessage(text, conversationId) {
+  var activityUrl = COPILOT_ENDPOINT + '/' + conversationId + '/activities' + COPILOT_API_VERSION;
   return fetch(activityUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -555,46 +577,27 @@ function sendCopilotMessage(text, conversationId) {
       from: { id: 'user', name: 'User' }
     })
   })
-  .then(function() {
-    // Poll for the bot's reply — Copilot is async so we wait then fetch activities
-    return new Promise(function(resolve) { setTimeout(resolve, 2500); });
-  })
-  .then(function() {
-    return fetch(activityUrl, { method: 'GET' });
-  })
   .then(function(res) { return res.json(); })
   .then(function(d) {
-    // Find the latest bot message in the activities list
-    var activities = d.activities || [];
-    var botMessages = activities.filter(function(a) {
-      return a.type === 'message' && a.from && a.from.role === 'bot';
-    });
-    if (botMessages.length > 0) {
-      return botMessages[botMessages.length - 1].text || null;
-    }
-    return null;
+    var sentActivityId = d.id || null;
+    // Wait 1s then start polling
+    return new Promise(function(resolve) { setTimeout(resolve, 1000); })
+      .then(function() { return pollForReply(conversationId, sentActivityId, 0); });
   });
 }
 
-// Main callAI — starts conversation on first call, sends messages after
 function callAI(msgs, teaser, captured) {
   var lastMsg = msgs[msgs.length - 1];
   var text = lastMsg ? lastMsg.content : '';
-
-  // If lead just captured, prepend their details to the message for context
   if (captured && state.name) {
     text = 'My name is ' + state.name + '. ' + text;
   }
-
-  // Start conversation on first message, reuse after
   var convPromise = copilotConversationId
     ? Promise.resolve(copilotConversationId)
     : startCopilotConversation();
 
   return convPromise
-    .then(function(convId) {
-      return sendCopilotMessage(text, convId);
-    })
+    .then(function(convId) { return sendCopilotMessage(text, convId); })
     .catch(function(err) {
       console.error('Copilot error:', err);
       return 'Sorry, having trouble connecting right now. Please call Dan directly on 0433 362 754.';
