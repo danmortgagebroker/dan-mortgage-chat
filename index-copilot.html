@@ -334,11 +334,9 @@ html,body{
 
 <script>
 // ── COPILOT STUDIO CONFIG ──
-// Unauthenticated endpoint — works for anonymous public users
-var COPILOT_ENDPOINT = 'https://default95511ce1d1a84cff80c455e45763a0.70.environment.api.powerplatform.com/copilotstudio/dataverse-backed/unauthenticated/bots/copilots_header_28455/conversations';
-var COPILOT_API_VERSION = '?api-version=2022-03-01-preview';
+// All calls go through our Cloudflare Worker proxy
+var COPILOT_WORKER = 'https://copilot-worker-v2.danisadj.workers.dev';
 var copilotConversationId = null;
-var copilotToken = null;
 
 // ── EMAILJS CONFIG ──
 var EMAILJS_SERVICE  = 'service_6vsgzsk';
@@ -525,79 +523,38 @@ function showGate() {
   scrollBottom();
 }
 
-/* ── COPILOT AI CALL ── */
-function startCopilotConversation() {
-  return fetch(COPILOT_ENDPOINT + COPILOT_API_VERSION, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({})
-  })
-  .then(function(res) {
-    if (!res.ok) throw new Error('Failed to start conversation: ' + res.status);
-    return res.json();
-  })
-  .then(function(d) {
-    copilotConversationId = d.id;
-    copilotToken = d.token;
-    return d.id;
-  });
-}
-
-// Poll for bot reply — retries up to 10 times with 1.5s gap (15s total max)
-function pollForReply(conversationId, afterActivityId, attempts) {
-  attempts = attempts || 0;
-  if (attempts > 10) return Promise.resolve(null);
-
-  var activityUrl = COPILOT_ENDPOINT + '/' + conversationId + '/activities' + COPILOT_API_VERSION;
-
-  return fetch(activityUrl)
-  .then(function(res) { return res.json(); })
-  .then(function(d) {
-    var activities = (d.activities || []).filter(function(a) {
-      return a.type === 'message' && a.from && a.from.role === 'bot';
-    });
-    if (activities.length > 0) {
-      return activities[activities.length - 1].text || null;
-    }
-    // No reply yet — wait 1.5s and try again
-    return new Promise(function(resolve) { setTimeout(resolve, 1500); })
-      .then(function() { return pollForReply(conversationId, afterActivityId, attempts + 1); });
-  });
-}
-
-function sendCopilotMessage(text, conversationId) {
-  var activityUrl = COPILOT_ENDPOINT + '/' + conversationId + '/activities' + COPILOT_API_VERSION;
-  return fetch(activityUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      type: 'message',
-      text: text,
-      locale: 'en-AU',
-      from: { id: 'user', name: 'User' }
-    })
-  })
-  .then(function(res) { return res.json(); })
-  .then(function(d) {
-    var sentActivityId = d.id || null;
-    // Wait 1s then start polling
-    return new Promise(function(resolve) { setTimeout(resolve, 1000); })
-      .then(function() { return pollForReply(conversationId, sentActivityId, 0); });
-  });
-}
-
+/* ── COPILOT AI CALL — via Cloudflare Worker proxy ── */
 function callAI(msgs, teaser, captured) {
   var lastMsg = msgs[msgs.length - 1];
   var text = lastMsg ? lastMsg.content : '';
   if (captured && state.name) {
     text = 'My name is ' + state.name + '. ' + text;
   }
-  var convPromise = copilotConversationId
-    ? Promise.resolve(copilotConversationId)
-    : startCopilotConversation();
 
-  return convPromise
-    .then(function(convId) { return sendCopilotMessage(text, convId); })
+  // If no conversation yet, start one first
+  var startPromise = copilotConversationId
+    ? Promise.resolve(copilotConversationId)
+    : fetch(COPILOT_WORKER + '/start', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+        .then(function(res) { return res.json(); })
+        .then(function(d) {
+          if (d.error) throw new Error(d.error);
+          copilotConversationId = d.conversationId;
+          return d.conversationId;
+        });
+
+  return startPromise
+    .then(function(convId) {
+      return fetch(COPILOT_WORKER + '/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: convId, message: text })
+      });
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(d) {
+      if (d.error) throw new Error(d.error);
+      return d.reply;
+    })
     .catch(function(err) {
       console.error('Copilot error:', err);
       return 'Sorry, having trouble connecting right now. Please call Dan directly on 0433 362 754.';
