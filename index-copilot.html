@@ -337,6 +337,7 @@ html,body{
 // All calls go through our Cloudflare Worker proxy
 var COPILOT_WORKER = 'https://copilot-worker-v2.danisadj.workers.dev';
 var copilotConversationId = null;
+var copilotToken = null;
 
 // ── EMAILJS CONFIG ──
 var EMAILJS_SERVICE  = 'service_6vsgzsk';
@@ -533,21 +534,22 @@ function callAI(msgs, teaser, captured) {
 
   // If no conversation yet, start one first
   var startPromise = copilotConversationId
-    ? Promise.resolve(copilotConversationId)
+    ? Promise.resolve({ conversationId: copilotConversationId, token: copilotToken })
     : fetch(COPILOT_WORKER + '/start', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
         .then(function(res) { return res.json(); })
         .then(function(d) {
           if (d.error) throw new Error(d.error);
           copilotConversationId = d.conversationId;
-          return d.conversationId;
+          copilotToken = d.token;
+          return { conversationId: d.conversationId, token: d.token };
         });
 
   return startPromise
-    .then(function(convId) {
+    .then(function(conv) {
       return fetch(COPILOT_WORKER + '/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId: convId, message: text })
+        body: JSON.stringify({ conversationId: conv.conversationId, token: conv.token, message: text })
       });
     })
     .then(function(res) { return res.json(); })
