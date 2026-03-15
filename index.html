@@ -240,6 +240,34 @@ html,body{
 .send-btn svg{width:16px;height:16px;fill:white;margin-left:1px}
 .input-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px}
 
+/* ── CLARIFY CHIPS ── */
+.clarify-chips{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-top:10px;
+}
+.clarify-chip{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:8px 14px;
+  font-size:13px;font-weight:500;
+  color:var(--text);cursor:pointer;
+  font-family:'Inter',sans-serif;
+  transition:border-color 0.15s,background 0.15s;
+  -webkit-appearance:none;
+}
+.clarify-chip:hover{border-color:var(--orange);background:var(--surface2)}
+
+/* ── CTA STRIP ── */
+.cta-strip{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--border);
+  font-size:13px;font-weight:500;
+  color:var(--orange);cursor:pointer;
+}
+.cta-strip:hover{color:var(--orange2)}
+
 /* ── MOBILE ── */
 @media(max-width:480px){
   .header{padding:12px 16px}
@@ -450,6 +478,22 @@ function addBotMsg(text) {
     mainText = mainText.slice(0, srcIdx).trim();
   }
 
+  // Extract [CLARIFY:option1|option2] marker if present
+  var clarifyOptions = null;
+  mainText = mainText.replace(/\[CLARIFY:([^\]]+)\]/g, function(_, opts) {
+    clarifyOptions = opts.split('|').map(function(o){ return o.trim(); });
+    return '';
+  }).trim();
+
+  // Extract [CTA] marker if present — replaced with styled strip
+  var hasCTA = false;
+  var ctaText = '';
+  mainText = mainText.replace(/\[CTA\]\s*(.*)/, function(_, rest) {
+    hasCTA = true;
+    ctaText = rest.trim();
+    return '';
+  }).trim();
+
   function formatText(t) {
     return t
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -463,9 +507,33 @@ function addBotMsg(text) {
     html += '<div class="citation-block">' + formatText(citationText.trim()) + '</div>';
   }
 
+  // Render CTA strip
+  if (hasCTA && ctaText) {
+    html += '<div class="cta-strip">' + formatText(ctaText) + ' →</div>';
+  }
+
   html += '</div>';
   row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
+
+  // Render clarify chips below the message row
+  if (clarifyOptions && clarifyOptions.length) {
+    var chipWrap = document.createElement('div');
+    chipWrap.className = 'clarify-chips';
+    chipWrap.style.paddingLeft = '42px';
+    clarifyOptions.forEach(function(opt) {
+      var chip = document.createElement('button');
+      chip.className = 'clarify-chip';
+      chip.textContent = opt;
+      chip.addEventListener('click', function() {
+        chipWrap.remove();
+        process(opt);
+      });
+      chipWrap.appendChild(chip);
+    });
+    m.appendChild(chipWrap);
+  }
+
   scrollBottom();
 }
 
