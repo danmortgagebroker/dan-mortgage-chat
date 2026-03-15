@@ -242,40 +242,23 @@ html,body{
 
 /* ── CLARIFY CHIPS ── */
 .clarify-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.clarify-chip{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:20px;padding:8px 14px;
-  font-size:13px;font-weight:500;color:var(--text);
-  cursor:pointer;font-family:'Inter',sans-serif;
-  transition:border-color 0.15s,background 0.15s;-webkit-appearance:none;
-}
+.clarify-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:8px 14px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;transition:border-color 0.15s,background 0.15s;-webkit-appearance:none}
 .clarify-chip:hover{border-color:var(--orange);background:var(--surface2)}
-
 /* ── CTA STRIP ── */
-.cta-strip{
-  margin-top:10px;padding-top:10px;
-  border-top:1px solid var(--border);
-  font-size:13px;font-weight:500;
-  color:var(--orange);cursor:pointer;
-}
+.cta-strip{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:13px;font-weight:500;color:var(--orange);cursor:pointer}
 .cta-strip:hover{color:var(--orange2)}
-
-/* ── NEXT STEPS CARD ── */
-.next-steps{
-  margin-top:12px;
-  background:#fff8f4;
-  border:1px solid var(--border);
-  border-left:3px solid var(--orange);
-  border-radius:0 8px 8px 0;
-  padding:12px 14px;
-}
-.next-steps-label{
-  font-size:11px;font-weight:600;color:var(--orange);
-  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;
-}
+/* ── NEXT STEPS ── */
+.next-steps{margin-top:12px;background:#fff8f4;border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;padding:12px 14px}
+.next-steps-label{font-size:11px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
 .next-steps ol{margin:0;padding:0 0 0 16px;display:flex;flex-direction:column;gap:5px}
 .next-steps ol li{font-size:13px;line-height:1.5;color:var(--text)}
-
+/* ── ACTION BUTTONS ── */
+.steps-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;padding-left:42px}
+.steps-btn{flex:1;min-width:130px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;text-align:center;text-decoration:none;transition:background 0.15s;-webkit-appearance:none;border:none;display:flex;align-items:center;justify-content:center;gap:6px}
+.steps-btn-primary{background:var(--orange);color:white}
+.steps-btn-primary:hover{background:var(--orange2)}
+.steps-btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)!important}
+.steps-btn-secondary:hover{border-color:var(--orange)!important;background:var(--surface2)}
 /* ── MOBILE ── */
 @media(max-width:480px){
   .header{padding:12px 16px}
@@ -479,21 +462,20 @@ function addBotMsg(text) {
   var mainText = parts[0];
   var citationText = parts.length > 1 ? parts.slice(1).join('\n---\n') : null;
 
-  // Check for "Sources used" without --- separator
   if (!citationText && mainText.indexOf('Sources used') !== -1) {
     var srcIdx = mainText.indexOf('Sources used');
     citationText = mainText.slice(srcIdx);
     mainText = mainText.slice(0, srcIdx).trim();
   }
 
-  // Extract [CLARIFY:option1|option2] marker
+  // Extract [CLARIFY:option1|option2]
   var clarifyOptions = null;
   mainText = mainText.replace(/\[CLARIFY:([^\]]+)\]/g, function(_, opts) {
     clarifyOptions = opts.split('|').map(function(o){ return o.trim(); });
     return '';
   }).trim();
 
-  // Extract [CTA] marker
+  // Extract [CTA]
   var hasCTA = false;
   var ctaText = '';
   mainText = mainText.replace(/\[CTA\]\s*(.+)/g, function(_, rest) {
@@ -502,7 +484,7 @@ function addBotMsg(text) {
     return '';
   }).trim();
 
-  // Extract [STEPS]...[/STEPS] block
+  // Extract [STEPS]...[/STEPS]
   var stepsItems = null;
   var stepsMatch = mainText.match(/\[STEPS\]([\s\S]*?)\[\/STEPS\]/);
   if (stepsMatch) {
@@ -545,7 +527,32 @@ function addBotMsg(text) {
   row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
 
-  // Clarify chips below the message
+  // Action buttons after steps — book call + leave details
+  if (stepsItems && stepsItems.length && !state.done) {
+    var actWrap = document.createElement('div');
+    actWrap.className = 'steps-actions';
+
+    var btnBook = document.createElement('a');
+    btnBook.className = 'steps-btn steps-btn-primary';
+    btnBook.href = 'https://www.danmortgagebroker.au/book-a-free-consultation';
+    btnBook.target = '_blank';
+    btnBook.rel = 'noopener';
+    btnBook.innerHTML = '📅 Book a free call';
+
+    var btnDetails = document.createElement('button');
+    btnDetails.className = 'steps-btn steps-btn-secondary';
+    btnDetails.innerHTML = '✉️ Leave my details';
+    btnDetails.addEventListener('click', function() {
+      actWrap.remove();
+      showGate();
+    });
+
+    actWrap.appendChild(btnBook);
+    actWrap.appendChild(btnDetails);
+    m.appendChild(actWrap);
+  }
+
+  // Clarify chips
   if (clarifyOptions && clarifyOptions.length) {
     var chipWrap = document.createElement('div');
     chipWrap.className = 'clarify-chips';
