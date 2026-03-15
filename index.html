@@ -241,32 +241,40 @@ html,body{
 .input-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px}
 
 /* ── CLARIFY CHIPS ── */
-.clarify-chips{
-  display:flex;flex-wrap:wrap;gap:8px;
-  margin-top:10px;
-}
+.clarify-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .clarify-chip{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:8px 14px;
-  font-size:13px;font-weight:500;
-  color:var(--text);cursor:pointer;
-  font-family:'Inter',sans-serif;
-  transition:border-color 0.15s,background 0.15s;
-  -webkit-appearance:none;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:8px 14px;
+  font-size:13px;font-weight:500;color:var(--text);
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:border-color 0.15s,background 0.15s;-webkit-appearance:none;
 }
 .clarify-chip:hover{border-color:var(--orange);background:var(--surface2)}
 
 /* ── CTA STRIP ── */
 .cta-strip{
-  margin-top:10px;
-  padding-top:10px;
+  margin-top:10px;padding-top:10px;
   border-top:1px solid var(--border);
   font-size:13px;font-weight:500;
   color:var(--orange);cursor:pointer;
 }
 .cta-strip:hover{color:var(--orange2)}
+
+/* ── NEXT STEPS CARD ── */
+.next-steps{
+  margin-top:12px;
+  background:#fff8f4;
+  border:1px solid var(--border);
+  border-left:3px solid var(--orange);
+  border-radius:0 8px 8px 0;
+  padding:12px 14px;
+}
+.next-steps-label{
+  font-size:11px;font-weight:600;color:var(--orange);
+  text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;
+}
+.next-steps ol{margin:0;padding:0 0 0 16px;display:flex;flex-direction:column;gap:5px}
+.next-steps ol li{font-size:13px;line-height:1.5;color:var(--text)}
 
 /* ── MOBILE ── */
 @media(max-width:480px){
@@ -466,38 +474,50 @@ function addBotMsg(text) {
   var row = document.createElement('div');
   row.className = 'msg bot';
 
-  // Split on citation block separator --- (handles with or without surrounding newlines)
+  // Split on citation block separator
   var parts = text.split(/\n?---\n?/);
   var mainText = parts[0];
   var citationText = parts.length > 1 ? parts.slice(1).join('\n---\n') : null;
 
-  // Also check for "Sources used" without --- separator
+  // Check for "Sources used" without --- separator
   if (!citationText && mainText.indexOf('Sources used') !== -1) {
     var srcIdx = mainText.indexOf('Sources used');
     citationText = mainText.slice(srcIdx);
     mainText = mainText.slice(0, srcIdx).trim();
   }
 
-  // Extract [CLARIFY:option1|option2] marker if present
+  // Extract [CLARIFY:option1|option2] marker
   var clarifyOptions = null;
   mainText = mainText.replace(/\[CLARIFY:([^\]]+)\]/g, function(_, opts) {
     clarifyOptions = opts.split('|').map(function(o){ return o.trim(); });
     return '';
   }).trim();
 
-  // Extract [CTA] marker if present — replaced with styled strip
+  // Extract [CTA] marker
   var hasCTA = false;
   var ctaText = '';
-  mainText = mainText.replace(/\[CTA\]\s*(.*)/, function(_, rest) {
+  mainText = mainText.replace(/\[CTA\]\s*(.+)/g, function(_, rest) {
     hasCTA = true;
     ctaText = rest.trim();
     return '';
   }).trim();
 
+  // Extract [STEPS]...[/STEPS] block
+  var stepsItems = null;
+  var stepsMatch = mainText.match(/\[STEPS\]([\s\S]*?)\[\/STEPS\]/);
+  if (stepsMatch) {
+    var stepsRaw = stepsMatch[1].trim();
+    stepsItems = stepsRaw.split('\n')
+      .map(function(s){ return s.replace(/^[-•*\d.]+\s*/, '').trim(); })
+      .filter(function(s){ return s.length > 0; });
+    mainText = mainText.replace(/\[STEPS\][\s\S]*?\[\/STEPS\]/, '').trim();
+  }
+
   function formatText(t) {
     return t
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/_(.*?)_/g,'<em>$1</em>')
       .replace(/\n/g,'<br>');
   }
 
@@ -507,7 +527,16 @@ function addBotMsg(text) {
     html += '<div class="citation-block">' + formatText(citationText.trim()) + '</div>';
   }
 
-  // Render CTA strip
+  // Next steps card
+  if (stepsItems && stepsItems.length) {
+    html += '<div class="next-steps"><div class="next-steps-label">Next steps</div><ol>';
+    stepsItems.forEach(function(step) {
+      html += '<li>' + formatText(step) + '</li>';
+    });
+    html += '</ol></div>';
+  }
+
+  // CTA strip
   if (hasCTA && ctaText) {
     html += '<div class="cta-strip">' + formatText(ctaText) + ' →</div>';
   }
@@ -516,7 +545,7 @@ function addBotMsg(text) {
   row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
 
-  // Render clarify chips below the message row
+  // Clarify chips below the message
   if (clarifyOptions && clarifyOptions.length) {
     var chipWrap = document.createElement('div');
     chipWrap.className = 'clarify-chips';
