@@ -253,12 +253,12 @@ html,body{
 .next-steps ol{margin:0;padding:0 0 0 16px;display:flex;flex-direction:column;gap:5px}
 .next-steps ol li{font-size:13px;line-height:1.5;color:var(--text)}
 /* ── ACTION BUTTONS ── */
-.steps-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;padding-left:42px}
-.steps-btn{flex:1;min-width:130px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;text-align:center;text-decoration:none;transition:background 0.15s;-webkit-appearance:none;border:none;display:flex;align-items:center;justify-content:center;gap:6px}
-.steps-btn-primary{background:var(--orange);color:white}
-.steps-btn-primary:hover{background:var(--orange2)}
-.steps-btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)!important}
-.steps-btn-secondary:hover{border-color:var(--orange)!important;background:var(--surface2)}
+.msg-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;padding-left:42px}
+.msg-btn{flex:1;min-width:130px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;text-align:center;text-decoration:none;transition:background 0.15s;-webkit-appearance:none;border:none;display:flex;align-items:center;justify-content:center;gap:6px}
+.msg-btn-primary{background:var(--orange);color:white}
+.msg-btn-primary:hover{background:var(--orange2)}
+.msg-btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)!important}
+.msg-btn-secondary:hover{border-color:var(--orange)!important;background:var(--surface2)}
 /* ── MOBILE ── */
 @media(max-width:480px){
   .header{padding:12px 16px}
@@ -527,23 +527,22 @@ function addBotMsg(text) {
   row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
 
-  // Action buttons after steps — book call + leave details
-  if (stepsItems && stepsItems.length && !state.done) {
+  // Action buttons — appear after every bot response, disappear once lead captured
+  if (!state.done) {
     var actWrap = document.createElement('div');
-    actWrap.className = 'steps-actions';
+    actWrap.className = 'msg-actions';
 
     var btnBook = document.createElement('a');
-    btnBook.className = 'steps-btn steps-btn-primary';
+    btnBook.className = 'msg-btn msg-btn-primary';
     btnBook.href = 'https://www.danmortgagebroker.au/book-a-free-consultation';
     btnBook.target = '_blank';
     btnBook.rel = 'noopener';
     btnBook.innerHTML = '📅 Book a free call';
 
     var btnDetails = document.createElement('button');
-    btnDetails.className = 'steps-btn steps-btn-secondary';
+    btnDetails.className = 'msg-btn msg-btn-secondary';
     btnDetails.innerHTML = '✉️ Leave my details';
     btnDetails.addEventListener('click', function() {
-      actWrap.remove();
       showGate();
     });
 
