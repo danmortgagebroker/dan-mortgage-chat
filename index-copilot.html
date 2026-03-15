@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Dan Poudyal — Mortgage Assistant (Copilot Test)</title>
+<title>Dan Poudyal — Mortgage Assistant</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -31,43 +31,117 @@ html,body{
   overflow:hidden;
 }
 
-.app{display:flex;flex-direction:column;height:100svh;height:100vh;max-width:780px;margin:0 auto;}
+/* ── LAYOUT ── */
+.app{
+  display:flex;flex-direction:column;
+  height:100svh;
+  height:100vh;
+  max-width:780px;
+  margin:0 auto;
+}
 
-.header{flex-shrink:0;padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg);}
+/* ── HEADER ── */
+.header{
+  flex-shrink:0;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);
+}
+
 .header-left{display:flex;align-items:center;gap:10px}
-.header-dot{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange2),var(--orange));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;font-family:'Inter',sans-serif;flex-shrink:0;}
+.header-dot{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--orange2),var(--orange));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:white;font-family:'Inter',sans-serif;
+  flex-shrink:0;
+}
 .header-title{font-size:15px;font-weight:600;color:var(--text)}
 .header-sub{font-size:12px;color:var(--text-muted);margin-top:1px;display:flex;align-items:center;gap:5px}
 .online-dot{width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0}
-.header-btn{background:var(--orange);color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;font-family:'Inter',sans-serif;white-space:nowrap;flex-shrink:0;}
+.header-btn{
+  background:var(--orange);color:white;
+  padding:8px 16px;border-radius:8px;
+  font-size:13px;font-weight:600;text-decoration:none;
+  font-family:'Inter',sans-serif;white-space:nowrap;
+  flex-shrink:0;
+}
 
-.progress-bar{flex-shrink:0;padding:7px 20px;border-bottom:1px solid var(--border);background:var(--bg);}
+/* -- PROGRESS BAR -- */
+.progress-bar{
+  flex-shrink:0;
+  padding:7px 20px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+}
 .progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
 .progress-label{font-size:11px;color:var(--text-muted);font-weight:500}
 .progress-pct{font-size:11px;color:var(--orange);font-weight:600}
 .progress-track{height:3px;background:var(--surface2);border-radius:3px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:3px;transition:width 0.6s ease;width:0%}
 
-.msgs{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 20px 12px;display:flex;flex-direction:column;gap:0;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+/* -- MESSAGES -- */
+.msgs{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:24px 20px 12px;
+  display:flex;flex-direction:column;gap:0;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
 .msgs::-webkit-scrollbar{width:4px}
 .msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
-.msg{display:flex;gap:12px;padding:14px 0;animation:fadeIn 0.2s ease;}
+/* message rows */
+.msg{
+  display:flex;gap:12px;
+  padding:14px 0;
+  animation:fadeIn 0.2s ease;
+}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
 .msg.bot{align-items:flex-start}
 .msg.user{align-items:flex-start;flex-direction:row-reverse}
 
-.msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:600;margin-top:2px;}
-.msg.bot .msg-av{background:linear-gradient(135deg,var(--orange2),var(--orange));color:white;font-size:12px;}
-.msg.user .msg-av{background:var(--surface2);color:var(--text-muted);font-size:11px;}
+.msg-av{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:13px;font-weight:600;
+  margin-top:2px;
+}
+.msg.bot .msg-av{
+  background:linear-gradient(135deg,var(--orange2),var(--orange));
+  color:white;font-size:12px;
+}
+.msg.user .msg-av{
+  background:var(--surface2);
+  color:var(--text-muted);font-size:11px;
+}
 
-.msg-body{flex:1;min-width:0;font-size:15px;line-height:1.7;color:var(--text);padding-top:4px;}
-.msg.user .msg-body{background:#f4f4f4;padding:10px 16px;border-radius:12px;font-size:14px;flex:0 1 auto;max-width:75%;color:#0d0d0d;}
+.msg-body{
+  flex:1;min-width:0;
+  font-size:15px;line-height:1.7;color:var(--text);
+  padding-top:4px;
+}
+.msg.user .msg-body{
+  background:#f4f4f4;
+  padding:10px 16px;border-radius:12px;
+  font-size:14px;flex:0 1 auto;max-width:75%;color:#0d0d0d;
+}
 
-.citation-block{margin-top:10px;padding:10px 12px;background:#f4f4f4;border-left:3px solid var(--orange);border-radius:0 6px 6px 0;font-size:12px;color:var(--text-muted);line-height:1.6;}
+.citation-block{
+  margin-top:10px;
+  padding:10px 12px;
+  background:#f4f4f4;
+  border-left:3px solid var(--orange);
+  border-radius:0 6px 6px 0;
+  font-size:12px;
+  color:var(--text-muted);
+  line-height:1.6;
+}
 
-.disclaimer{display:block;margin-top:10px;font-size:11px;color:var(--text-muted);font-style:italic;line-height:1.5;}
-
+/* typing indicator */
 .typing-row{display:flex;gap:12px;padding:14px 0;align-items:flex-start}
 .typing-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--orange2),var(--orange));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;flex-shrink:0;margin-top:2px}
 .typing-dots{display:flex;gap:4px;align-items:center;padding-top:10px}
@@ -76,36 +150,150 @@ html,body{
 .typing-dots span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,60%,100%{opacity:.3;transform:scale(0.8)}30%{opacity:1;transform:scale(1)}}
 
-.starters{flex-shrink:0;padding:0 20px 16px;}
+/* ── STARTERS ── */
+.starters{
+  flex-shrink:0;
+  padding:0 20px 16px;
+}
 .starters-label{font-size:12px;color:var(--text-muted);margin-bottom:10px;font-weight:500}
-.starters-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.starter{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;text-align:left;transition:border-color 0.15s,background 0.15s;line-height:1.4;font-family:'Inter',sans-serif;-webkit-appearance:none;}
+.starters-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.starter{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+  font-size:13px;font-weight:500;color:var(--text);
+  cursor:pointer;text-align:left;
+  transition:border-color 0.15s,background 0.15s;
+  line-height:1.4;font-family:'Inter',sans-serif;
+  -webkit-appearance:none;
+}
 .starter:hover{border-color:var(--orange);background:var(--surface2)}
 .starter-icon{display:block;font-size:18px;margin-bottom:6px}
 
-.gate{flex-shrink:0;margin:0 20px 12px;background:#f9f9f9;border:1px solid var(--border);border-radius:12px;padding:18px;}
+/* ── LEAD GATE ── */
+.gate{
+  flex-shrink:0;
+  margin:0 20px 12px;
+  background:#f9f9f9;
+  border:1px solid var(--border);
+  border-radius:12px;padding:18px;
+}
 .gate-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
 .gate-sub{font-size:13px;color:var(--text-muted);margin-bottom:14px}
 .gate-row{display:flex;gap:8px;margin-bottom:8px}
-.gate-inp{flex:1;min-width:0;background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);outline:none;-webkit-appearance:none;}
+.gate-inp{
+  flex:1;min-width:0;
+  background:#ffffff;border:1px solid var(--border);
+  border-radius:8px;padding:10px 13px;
+  font-size:14px;font-family:'Inter',sans-serif;color:var(--text);
+  outline:none;-webkit-appearance:none;
+}
 .gate-inp:focus{border-color:var(--orange)}
 .gate-inp::placeholder{color:var(--text-muted)}
-.gate-btn{width:100%;background:var(--orange);color:white;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;-webkit-appearance:none;transition:background 0.15s;}
+.gate-btn{
+  width:100%;background:var(--orange);color:white;
+  border:none;border-radius:8px;padding:12px;
+  font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;-webkit-appearance:none;
+  transition:background 0.15s;
+}
 .gate-btn:hover{background:var(--orange2)}
 .gate-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px}
 
-.input-area{flex-shrink:0;padding:10px 20px;padding-bottom:max(10px, env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border);}
-.input-wrap{display:flex;align-items:flex-end;gap:10px;background:#f4f4f4;border:1px solid var(--border);border-radius:12px;padding:10px 14px;transition:border-color 0.15s;}
+/* ── INPUT BAR ── */
+.input-area{
+  flex-shrink:0;
+  padding:10px 20px;
+  padding-bottom:max(10px, env(safe-area-inset-bottom));
+  background:var(--bg);
+  border-top:1px solid var(--border);
+}
+.input-wrap{
+  display:flex;align-items:flex-end;gap:10px;
+  background:#f4f4f4;
+  border:1px solid var(--border);
+  border-radius:12px;padding:10px 14px;
+  transition:border-color 0.15s;
+}
 .input-wrap:focus-within{border-color:var(--orange)}
-.inp{flex:1;background:none;border:none;outline:none;font-size:15px;font-family:'Inter',sans-serif;color:var(--text);resize:none;max-height:120px;line-height:1.5;-webkit-appearance:none;}
+.inp{
+  flex:1;background:none;border:none;outline:none;
+  font-size:15px;font-family:'Inter',sans-serif;color:var(--text);
+  resize:none;max-height:120px;line-height:1.5;
+  -webkit-appearance:none;
+}
 .inp::placeholder{color:var(--text-muted)}
 .inp:disabled{opacity:0.4;cursor:not-allowed}
-.send-btn{width:34px;height:34px;border-radius:8px;flex-shrink:0;background:var(--orange);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;-webkit-appearance:none;align-self:flex-end;}
+.send-btn{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  background:var(--orange);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background 0.15s;-webkit-appearance:none;
+  align-self:flex-end;
+}
 .send-btn:hover{background:var(--orange2)}
 .send-btn:disabled{opacity:0.35;cursor:not-allowed}
 .send-btn svg{width:16px;height:16px;fill:white;margin-left:1px}
 .input-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px}
 
+/* ── CLARIFY CHIPS ── */
+.clarify-chips{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-top:10px;
+}
+.clarify-chip{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:8px 14px;
+  font-size:13px;font-weight:500;
+  color:var(--text);cursor:pointer;
+  font-family:'Inter',sans-serif;
+  transition:border-color 0.15s,background 0.15s;
+  -webkit-appearance:none;
+}
+.clarify-chip:hover{border-color:var(--orange);background:var(--surface2)}
+
+/* ── CTA STRIP ── */
+.cta-strip{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--border);
+  font-size:13px;font-weight:500;
+  color:var(--orange);cursor:pointer;
+}
+.cta-strip:hover{color:var(--orange2)}
+
+/* ── NEXT STEPS CARD ── */
+.next-steps{
+  margin-top:10px;
+  background:#f9f9f9;
+  border:1px solid var(--border);
+  border-left:3px solid var(--orange);
+  border-radius:0 8px 8px 0;
+  padding:12px 14px;
+}
+.next-steps-label{
+  font-size:11px;font-weight:600;
+  color:var(--orange);
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+  margin-bottom:8px;
+}
+.next-steps ol{
+  margin:0;padding:0 0 0 16px;
+  display:flex;flex-direction:column;gap:5px;
+}
+.next-steps ol li{
+  font-size:13px;line-height:1.5;
+  color:var(--text);
+}
+
+/* ── MOBILE ── */
 @media(max-width:480px){
   .header{padding:12px 16px}
   .msgs{padding:16px 14px 8px}
@@ -123,6 +311,7 @@ html,body{
 <body>
 <div class="app">
 
+  <!-- HEADER -->
   <div class="header">
     <div class="header-left">
       <div class="header-dot">D</div>
@@ -134,6 +323,7 @@ html,body{
     <a class="header-btn" href="tel:0433362754">Call Dan</a>
   </div>
 
+  <!-- PROGRESS BAR -->
   <div class="progress-bar">
     <div class="progress-row">
       <span class="progress-label" id="pg-label">Ask your first question to get started</span>
@@ -144,8 +334,10 @@ html,body{
     </div>
   </div>
 
+  <!-- MESSAGES -->
   <div class="msgs" id="msgs"></div>
 
+  <!-- STARTERS -->
   <div class="starters" id="starters">
     <div class="starters-label">What would you like to know?</div>
     <div class="starters-grid" id="starters-grid">
@@ -158,6 +350,7 @@ html,body{
     </div>
   </div>
 
+  <!-- LEAD GATE (hidden initially) -->
   <div class="gate" id="gate" style="display:none">
     <div class="gate-title">Get your full answer</div>
     <div class="gate-sub">Leave your details and Dan will follow up personally — free, no obligation.</div>
@@ -170,6 +363,7 @@ html,body{
     <div class="gate-note">🔒 Private · Never shared · Zero spam</div>
   </div>
 
+  <!-- INPUT -->
   <div class="input-area" id="input-area">
     <div class="input-wrap">
       <input class="inp" id="inp" type="text" placeholder="Ask anything about home loans..." autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="send"/>
@@ -183,22 +377,7 @@ html,body{
 </div>
 
 <script>
-// ── COPILOT STUDIO CONFIG ──
-var COPILOT_WORKER = 'https://copilot-worker-v2.danisadj.workers.dev';
-
-// FIX 1: conversation state is now an object so we can reset it cleanly
-var copilotSession = {
-  conversationId: null,
-  token: null
-};
-
-// FIX 2: Reset session so stale IDs never persist across page loads
-// (Previously these were module-level vars that survived if the page
-//  didn't fully reload but Copilot's server-side conversation expired)
-function resetCopilotSession() {
-  copilotSession.conversationId = null;
-  copilotSession.token = null;
-}
+var WORKER = 'https://mortgage-ai.danisadj.workers.dev';
 
 // ── EMAILJS CONFIG ──
 var EMAILJS_SERVICE  = 'service_6vsgzsk';
@@ -219,12 +398,76 @@ var state = {
   phase: 'idle'
 };
 
+// ── INTENT DETECTION — runs client-side before every API call ──
 function detectIntent(text) {
   var t = text.toLowerCase();
-  var highSignals = [/\$[\d,]+/,/\d+k\b/,/earn(ing)?\s+\d/,/income.{0,20}\d/,/salary.{0,20}\d/,/looking at.{0,30}(property|house|place|apartment)/,/want to buy.{0,30}(in|at|near)/,/found (a |the )?(property|house|place)/,/settlement/,/auction/,/\d+\s*(week|month)s?\s*(time|away|to buy)/,/pre.?approv/,/eligible/,/first home (guarantee|grant)/,/fhbg/,/stamp duty/,/knocked back/,/declined/,/rejected/,/bank said no/,/my (deposit|savings) (is|are)/,/i have \$[\d,]+/,/deposit of/,/how much can i borrow/,/borrowing (capacity|power)/,/serviceability/,/tax return.{0,20}(show|low|lodg)/,/sole trader/,/my business/,/(maternity|parental) leave.{0,30}(borrow|loan|buy)/,/return(ing)? to work/,/investment property/,/negative(ly)? gear/,/equity.{0,20}(access|use|release)/,/current rate.{0,20}(is|of|\d)/,/paying.{0,20}(percent|%|\d)/,/fix(ed)?.{0,20}expir/,/cashback/,/second property/,/refinanc/];
-  for (var i = 0; i < highSignals.length; i++) { if (highSignals[i].test(t)) return 'high'; }
-  var mediumSignals = [/how much/,/can i (get|borrow|qualify|afford)/,/do i qualify/,/am i eligible/,/what do i need/,/should i/,/which (lender|bank|loan)/,/my situation/,/help me/,/not sure/,/worried/,/stressed/];
-  for (var j = 0; j < mediumSignals.length; j++) { if (mediumSignals[j].test(t)) return 'medium'; }
+
+  var highSignals = [
+    /\$[\d,]+/,
+    /\d+k\b/,
+    /earn(ing)?\s+\d/,
+    /income.{0,20}\d/,
+    /salary.{0,20}\d/,
+    /looking at.{0,30}(property|house|place|apartment)/,
+    /want to buy.{0,30}(in|at|near)/,
+    /found (a |the )?(property|house|place)/,
+    /settlement/,
+    /auction/,
+    /\d+\s*(week|month)s?\s*(time|away|to buy)/,
+    /pre.?approv/,
+    /eligible/,
+    /first home (guarantee|grant)/,
+    /fhbg/,
+    /stamp duty/,
+    /knocked back/,
+    /declined/,
+    /rejected/,
+    /bank said no/,
+    /my (deposit|savings) (is|are)/,
+    /i have \$[\d,]+/,
+    /deposit of/,
+    /how much can i borrow/,
+    /borrowing (capacity|power)/,
+    /serviceability/,
+    /tax return.{0,20}(show|low|lodg)/,
+    /sole trader/,
+    /my business/,
+    /(maternity|parental) leave.{0,30}(borrow|loan|buy)/,
+    /return(ing)? to work/,
+    /investment property/,
+    /negative(ly)? gear/,
+    /equity.{0,20}(access|use|release)/,
+    /current rate.{0,20}(is|of|\d)/,
+    /paying.{0,20}(percent|%|\d)/,
+    /fix(ed)?.{0,20}expir/,
+    /cashback/,
+    /second property/,
+    /refinanc/,
+  ];
+
+  for (var i = 0; i < highSignals.length; i++) {
+    if (highSignals[i].test(t)) return 'high';
+  }
+
+  var mediumSignals = [
+    /how much/,
+    /can i (get|borrow|qualify|afford)/,
+    /do i qualify/,
+    /am i eligible/,
+    /what do i need/,
+    /should i/,
+    /which (lender|bank|loan)/,
+    /my situation/,
+    /help me/,
+    /not sure/,
+    /worried/,
+    /stressed/,
+  ];
+
+  for (var j = 0; j < mediumSignals.length; j++) {
+    if (mediumSignals[j].test(t)) return 'medium';
+  }
+
   return 'low';
 }
 
@@ -237,52 +480,106 @@ function setP(pct, label) {
   if (pctEl) pctEl.textContent = pct > 0 ? pct + '%' : '';
 }
 
+/* ── HELPERS ── */
 function scrollBottom() {
   var m = document.getElementById('msgs');
   m.scrollTop = m.scrollHeight;
 }
 
-// ── FIX 3: Citation parser — strips ALL Copilot citation formats ──
-// Copilot Studio returns citations as:
-//   [1]: cite:1 "Citation-1"      ← footnote-style (was rendering as raw text)
-//   [^1]: https://...             ← URL footnotes
-//   Sources used\n...             ← "Sources used" block
-//   ---\n...                      ← separator block
-// We strip all of these from the visible text.
-function stripCitations(text) {
-  return text
-    // Remove markdown footnote-style citations: [1]: cite:N "label" or [1]: https://...
-    .replace(/\[\d+\]:\s*cite:\d+\s*"[^"]*"\s*/gm, '')
-    .replace(/\[\^?\d+\]:\s*https?:\/\/\S+\s*/gm, '')
-    // Remove inline citation references: [1] or [^1]
-    .replace(/\[\^?\d+\]/g, '')
-    // Remove "Sources used" sections
-    .replace(/\n?Sources used[\s\S]*/i, '')
-    // Remove --- separator and everything after
-    .replace(/\n?---[\s\S]*/g, '')
-    .trim();
-}
-
-// ── FIX 4: Better addBotMsg — clean citations before rendering ──
 function addBotMsg(text) {
   var m = document.getElementById('msgs');
   var row = document.createElement('div');
   row.className = 'msg bot';
 
-  // Strip all Copilot citation artifacts
-  var cleanText = stripCitations(text);
+  // Split on citation block separator
+  var parts = text.split(/\n?---\n?/);
+  var mainText = parts[0];
+  var citationText = parts.length > 1 ? parts.slice(1).join('\n---\n') : null;
+
+  // Also check for "Sources used" without --- separator
+  if (!citationText && mainText.indexOf('Sources used') !== -1) {
+    var srcIdx = mainText.indexOf('Sources used');
+    citationText = mainText.slice(srcIdx);
+    mainText = mainText.slice(0, srcIdx).trim();
+  }
+
+  // Extract [CLARIFY:option1|option2] marker
+  var clarifyOptions = null;
+  mainText = mainText.replace(/\[CLARIFY:([^\]]+)\]/g, function(_, opts) {
+    clarifyOptions = opts.split('|').map(function(o){ return o.trim(); });
+    return '';
+  }).trim();
+
+  // Extract [CTA] marker
+  var hasCTA = false;
+  var ctaText = '';
+  mainText = mainText.replace(/\[CTA\]\s*(.+)/g, function(_, rest) {
+    hasCTA = true;
+    ctaText = rest.trim();
+    return '';
+  }).trim();
+
+  // Extract [STEPS] block
+  var stepsItems = null;
+  var stepsMatch = mainText.match(/\[STEPS\]([\s\S]*?)(\[\/STEPS\]|$)/);
+  if (stepsMatch) {
+    var stepsRaw = stepsMatch[1].trim();
+    stepsItems = stepsRaw.split('\n')
+      .map(function(s){ return s.replace(/^[-•*\d.]+\s*/, '').trim(); })
+      .filter(function(s){ return s.length > 0; });
+    mainText = mainText.replace(/\[STEPS\][\s\S]*?(\[\/STEPS\]|$)/, '').trim();
+  }
 
   function formatText(t) {
     return t
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-      .replace(/_(.*?)_/g,'<span class="disclaimer">$1</span>')
+      .replace(/_(.*?)_/g,'<em>$1</em>')
       .replace(/\n/g,'<br>');
   }
 
-  var html = '<div class="msg-body">' + formatText(cleanText) + '</div>';
+  var html = '<div class="msg-body">' + formatText(mainText);
+
+  if (citationText) {
+    html += '<div class="citation-block">' + formatText(citationText.trim()) + '</div>';
+  }
+
+  // Render next steps card inside bubble
+  if (stepsItems && stepsItems.length) {
+    html += '<div class="next-steps"><div class="next-steps-label">Next steps</div><ol>';
+    stepsItems.forEach(function(step) {
+      html += '<li>' + formatText(step) + '</li>';
+    });
+    html += '</ol></div>';
+  }
+
+  // Render CTA strip inside bubble
+  if (hasCTA && ctaText) {
+    html += '<div class="cta-strip">' + formatText(ctaText) + ' →</div>';
+  }
+
+  html += '</div>';
   row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
+
+  // Render clarify chips below the message row
+  if (clarifyOptions && clarifyOptions.length) {
+    var chipWrap = document.createElement('div');
+    chipWrap.className = 'clarify-chips';
+    chipWrap.style.paddingLeft = '42px';
+    clarifyOptions.forEach(function(opt) {
+      var chip = document.createElement('button');
+      chip.className = 'clarify-chip';
+      chip.textContent = opt;
+      chip.addEventListener('click', function() {
+        chipWrap.remove();
+        process(opt);
+      });
+      chipWrap.appendChild(chip);
+    });
+    m.appendChild(chipWrap);
+  }
+
   scrollBottom();
 }
 
@@ -327,68 +624,39 @@ function showGate() {
   scrollBottom();
 }
 
-// ── FIX 5: Robust callAI with session recovery ──
-// If the Copilot conversation has expired server-side, the worker returns
-// an error. We catch it, reset the session, and retry ONCE automatically.
-function callCopilot(message, isRetry) {
-  var startPromise = copilotSession.conversationId
-    ? Promise.resolve({ conversationId: copilotSession.conversationId, token: copilotSession.token })
-    : fetch(COPILOT_WORKER + '/start', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
-        .then(function(res) { return res.json(); })
-        .then(function(d) {
-          if (d.error) throw new Error('start_failed: ' + d.error);
-          copilotSession.conversationId = d.conversationId;
-          copilotSession.token = d.token;
-          return { conversationId: d.conversationId, token: d.token };
-        });
-
-  return startPromise
-    .then(function(conv) {
-      return fetch(COPILOT_WORKER + '/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversationId: conv.conversationId,
-          token: conv.token,
-          message: message
-        })
-      });
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(d) {
-      if (d.error) {
-        // FIX: If conversation expired/invalid and we haven't retried yet,
-        // reset session and try once more with a fresh conversation
-        if (!isRetry && (d.error.indexOf('expired') !== -1 || d.error.indexOf('not found') !== -1 || d.error.indexOf('invalid') !== -1)) {
-          console.warn('Copilot session expired, resetting and retrying...');
-          resetCopilotSession();
-          return callCopilot(message, true);
-        }
-        throw new Error(d.error);
-      }
-      return d.reply;
-    });
-}
-
+/* ── AI CALL ── */
 function callAI(msgs, teaser, captured) {
-  var lastMsg = msgs[msgs.length - 1];
-  var text = lastMsg ? lastMsg.content : '';
-  if (captured && state.name) {
-    text = 'My name is ' + state.name + '. ' + text;
-  }
-
-  return callCopilot(text, false)
-    .catch(function(err) {
-      console.error('Copilot error:', err);
-      // FIX 6: Return a graceful fallback instead of letting the promise
-      // reject silently (which caused the "message channel closed" error)
-      return 'Sorry, having trouble connecting right now. Please call Dan directly on 0433 362 754.';
-    });
+  return fetch(WORKER, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: msgs,
+      teaserMode: teaser || false,
+      leadCaptured: captured || false,
+      leadName: state.name,
+      activeModule: state.module,
+      intentSignal: state.lastIntent
+    })
+  })
+  .then(function(res) {
+    return res.json();
+  })
+  .then(function(d) {
+    if (d && d.content && d.content[0] && d.content[0].text) {
+      return d.content[0].text;
+    }
+    return null;
+  })
+  .catch(function(err) {
+    return 'Sorry, having trouble connecting right now. Please call Dan directly on 0433 362 754.';
+  });
 }
 
+/* ── PROCESS MESSAGE ── */
 function process(text, moduleOverride) {
   if (state.phase === 'gate') return;
 
+  // Set module if starter button specified one
   if (moduleOverride) state.module = moduleOverride;
 
   hideStarters();
@@ -397,12 +665,17 @@ function process(text, moduleOverride) {
   state.qc++;
   state.phase = 'chat';
 
+  // Store intent for email logging only — not used for gating anymore
   var intent = detectIntent(text);
   state.lastIntent = intent;
+
+  // Log this message
   state.log.push({ role: 'user', text: text, intent: intent, ts: Date.now() });
 
+  // ── GATE LOGIC: show gate after 4th answer ──
   var gateNow = !state.done && state.qc >= 4;
 
+  // ── POST-GATE LIMIT: stop chat after 2 more exchanges post lead capture ──
   if (state.done && state.postGateCount >= 2) {
     addBotMsg("You've covered a lot of ground! For anything more specific, Dan is best placed to help directly. Call him on 0433 362 754 or check your email — he'll be in touch soon.");
     setDis(true);
@@ -415,23 +688,19 @@ function process(text, moduleOverride) {
     setP(Math.min(15 + state.qc * 15, 70), 'Thinking...');
   }
 
-  // FIX 7: Disable input while waiting to prevent duplicate sends
-  setDis(true);
   showTyping();
-
   callAI(state.msgs, gateNow, false).then(function(reply) {
     hideTyping();
-    // Re-enable input unless we're about to show the gate
-    if (!gateNow) setDis(false);
-
     if (!reply) return;
 
+    // Strip any accidental JSON intent tag from AI reply before displaying
     var clean = reply.replace(/\s*\{"intent"[^}]*\}/g, '').trim();
 
     addBotMsg(clean);
     state.msgs.push({ role: 'assistant', content: clean });
     state.log.push({ role: 'assistant', text: clean, ts: Date.now() });
 
+    // Increment post-gate counter
     if (state.done) state.postGateCount++;
 
     if (gateNow) {
@@ -443,6 +712,7 @@ function process(text, moduleOverride) {
   });
 }
 
+/* ── SEND ── */
 function doSend() {
   var inp = document.getElementById('inp');
   var text = inp.value.trim();
@@ -451,13 +721,16 @@ function doSend() {
   process(text);
 }
 
+/* ── EMAILJS INIT ── */
 (function(){
   if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_KEY);
 })();
 
+/* ── SEND LEAD EMAIL ── */
 function sendLeadEmail(name, email, phone) {
   if (typeof emailjs === 'undefined') return;
 
+  // Build readable question list from log
   var questions = state.log
     .filter(function(e) { return e.role === 'user'; })
     .map(function(e, i) { return (i + 1) + '. ' + e.text; })
@@ -479,16 +752,17 @@ function sendLeadEmail(name, email, phone) {
   }[state.lastIntent] || state.lastIntent;
 
   emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-    lead_name:      name,
-    lead_email:     email,
-    lead_phone:     phone || 'Not provided',
-    lead_module:    moduleLabel,
-    lead_intent:    intentLabel,
+    lead_name:     name,
+    lead_email:    email,
+    lead_phone:    phone || 'Not provided',
+    lead_module:   moduleLabel,
+    lead_intent:   intentLabel,
     lead_questions: questions || 'No questions recorded',
-    lead_time:      new Date().toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' })
-  }).catch(function(err) { console.error('EmailJS error:', err); });
+    lead_time:     new Date().toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' })
+  }).catch(function(err) {
+    console.error('EmailJS error:', err);
+  });
 }
-
 function submitLead() {
   var n = document.getElementById('g-name').value.trim();
   var e = document.getElementById('g-email').value.trim();
@@ -506,17 +780,28 @@ function submitLead() {
   document.getElementById('gate').style.display = 'none';
   setDis(false);
 
+  // Send email notification with full conversation
   sendLeadEmail(n, e, p);
+
+  // Send log to Worker (D1 if configured, otherwise silent)
+  fetch(WORKER, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      logOnly: true,
+      lead: { name: n, email: e, phone: p },
+      module: state.module,
+      log: state.log,
+      ts: new Date().toISOString()
+    })
+  }).catch(function(){});
 
   state.msgs.push({ role: 'user', content: 'My name is ' + n + ', email ' + e + (p ? ', phone ' + p : '') + '. Please give me the full detailed answer now.' });
 
   setP(92, 'Preparing your full answer...');
   showTyping();
-  setDis(true);
-
   callAI(state.msgs, false, true).then(function(reply) {
     hideTyping();
-    setDis(false);
     if (reply) {
       var clean = reply.replace(/\s*\{"intent"[^}]*\}/g, '').trim();
       addBotMsg(clean);
@@ -529,7 +814,10 @@ function submitLead() {
   });
 }
 
+/* ── WIRE UP ── */
 document.addEventListener('DOMContentLoaded', function() {
+
+  // Starter buttons
   document.getElementById('starters-grid').addEventListener('click', function(e) {
     var btn = e.target.closest('.starter');
     if (!btn) return;
@@ -538,10 +826,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (q) process(q, mod);
   });
 
+  // Send button
   document.getElementById('send-btn').addEventListener('click', function() {
     doSend();
   });
 
+  // Enter key
   document.getElementById('inp').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -549,15 +839,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Gate submit
   document.getElementById('gate-btn').addEventListener('click', function() {
     submitLead();
   });
 
+  // Gate enter key
   ['g-name','g-email','g-phone'].forEach(function(id) {
     document.getElementById(id).addEventListener('keydown', function(e) {
       if (e.key === 'Enter') submitLead();
     });
   });
+
 });
 </script>
 </body>
