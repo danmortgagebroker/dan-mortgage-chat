@@ -255,6 +255,8 @@ html,body{
 .clarify-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .clarify-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:8px 14px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;transition:border-color 0.15s,background 0.15s;-webkit-appearance:none}
 .clarify-chip:hover{border-color:var(--orange);background:var(--surface2)}
+.clarify-chip-else{border-style:dashed;color:var(--text-muted)}
+.clarify-chip-else:hover{color:var(--text)}
 /* ── CTA STRIP ── */
 .cta-strip{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:13px;font-weight:500;color:var(--orange);cursor:pointer}
 .cta-strip:hover{color:var(--orange2)}
@@ -626,6 +628,17 @@ function addBotMsg(text) {
       });
       chipWrap.appendChild(chip);
     });
+    // Always add "Something else" escape hatch
+    var chipElse = document.createElement('button');
+    chipElse.className = 'clarify-chip clarify-chip-else';
+    chipElse.textContent = '✏️ Something else...';
+    chipElse.addEventListener('click', function() {
+      chipWrap.remove();
+      var inp = document.getElementById('inp');
+      inp.focus();
+      inp.placeholder = 'Type your question...';
+    });
+    chipWrap.appendChild(chipElse);
     m.appendChild(chipWrap);
   }
 
