@@ -554,10 +554,10 @@ function addBotMsg(text) {
   row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
 
-  // Action buttons — only show contextually, not on every message
-  var showCTA = !state.done && (
+  // Action buttons — only show when bot gives a conclusion, not mid-question
+  var botIsAsking = mainText.trim().slice(-1) === '?';
+  var showCTA = !state.done && !botIsAsking && (
     state.lastIntent === 'high' ||           // user shared specific details
-    state.qc >= 3 ||                         // 3+ exchanges = engaged enough
     hasCTA                                   // AI explicitly requested CTA
   );
 
