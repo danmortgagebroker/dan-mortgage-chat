@@ -628,17 +628,19 @@ function addBotMsg(text) {
       });
       chipWrap.appendChild(chip);
     });
-    // Always add "Something else" escape hatch
-    var chipElse = document.createElement('button');
-    chipElse.className = 'clarify-chip clarify-chip-else';
-    chipElse.textContent = '✏️ Something else...';
-    chipElse.addEventListener('click', function() {
-      chipWrap.remove();
-      var inp = document.getElementById('inp');
-      inp.focus();
-      inp.placeholder = 'Type your question...';
-    });
-    chipWrap.appendChild(chipElse);
+    // Add "Something else" escape hatch on first response only
+    if (state.qc === 1) {
+      var chipElse = document.createElement('button');
+      chipElse.className = 'clarify-chip clarify-chip-else';
+      chipElse.textContent = '✏️ Something else...';
+      chipElse.addEventListener('click', function() {
+        chipWrap.remove();
+        var inp = document.getElementById('inp');
+        inp.focus();
+        inp.placeholder = 'Type your question...';
+      });
+      chipWrap.appendChild(chipElse);
+    }
     m.appendChild(chipWrap);
   }
 
