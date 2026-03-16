@@ -580,8 +580,15 @@ function addBotMsg(text) {
   row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
 
-  // Action buttons — appear after every bot response, disappear once lead captured
-  if (!state.done) {
+  // Action buttons — only show on high intent conclusive answers, never mid-conversation
+  var cleanedText = mainText.trim().replace(/[.!?]+$/, '');
+  var endsWithQuestion = mainText.trim().slice(-1) === '?';
+  var showCTA = !state.done && !endsWithQuestion && !clarifyOptions && (
+    state.lastIntent === 'high' ||
+    hasCTA
+  );
+
+  if (showCTA) {
     var actWrap = document.createElement('div');
     actWrap.className = 'msg-actions';
 
