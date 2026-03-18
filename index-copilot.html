@@ -607,7 +607,14 @@ function callAI(msgs, teaser, captured) {
       return res.json();
     })
     .then(function(d) {
-      if (d && d.reply) return d.reply;
+      if (d && d.reply) {
+        var clean = d.reply
+          .replace(/\[\d+\]:\s*cite:\d+\s*"[^"]*"/g, '')
+          .replace(/\[\d+\]/g, '')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+        return clean;
+      }
       return null;
     })
     .catch(function() {
