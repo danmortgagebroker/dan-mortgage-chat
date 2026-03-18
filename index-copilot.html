@@ -31,7 +31,6 @@ html,body{
   overflow:hidden;
 }
 
-/* ── LAYOUT ── */
 .app{
   display:flex;flex-direction:column;
   height:100svh;
@@ -40,7 +39,6 @@ html,body{
   margin:0 auto;
 }
 
-/* ── HEADER ── */
 .header{
   flex-shrink:0;
   padding:14px 20px;
@@ -68,7 +66,6 @@ html,body{
   flex-shrink:0;
 }
 
-/* -- PROGRESS BAR -- */
 .progress-bar{
   flex-shrink:0;
   padding:7px 20px;
@@ -81,7 +78,6 @@ html,body{
 .progress-track{height:3px;background:var(--surface2);border-radius:3px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:3px;transition:width 0.6s ease;width:0%}
 
-/* -- MESSAGES -- */
 .msgs{
   flex:1;overflow-y:auto;overflow-x:hidden;
   padding:24px 20px 12px;
@@ -93,7 +89,6 @@ html,body{
 .msgs::-webkit-scrollbar{width:4px}
 .msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
-/* message rows */
 .msg{
   display:flex;gap:12px;
   padding:14px 0;
@@ -141,7 +136,6 @@ html,body{
   line-height:1.6;
 }
 
-/* typing indicator */
 .typing-row{display:flex;gap:12px;padding:14px 0;align-items:flex-start}
 .typing-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--orange2),var(--orange));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;flex-shrink:0;margin-top:2px}
 .typing-dots{display:flex;gap:4px;align-items:center;padding-top:10px}
@@ -150,7 +144,6 @@ html,body{
 .typing-dots span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,60%,100%{opacity:.3;transform:scale(0.8)}30%{opacity:1;transform:scale(1)}}
 
-/* ── STARTERS ── */
 .starters{
   flex-shrink:0;
   padding:0 20px 16px;
@@ -174,7 +167,6 @@ html,body{
 .starter:hover{border-color:var(--orange);background:var(--surface2)}
 .starter-icon{display:block;font-size:18px;margin-bottom:6px}
 
-/* ── LEAD GATE ── */
 .gate{
   flex-shrink:0;
   margin:0 20px 12px;
@@ -204,7 +196,6 @@ html,body{
 .gate-btn:hover{background:var(--orange2)}
 .gate-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px}
 
-/* ── INPUT BAR ── */
 .input-area{
   flex-shrink:0;
   padding:10px 20px;
@@ -240,7 +231,6 @@ html,body{
 .send-btn svg{width:16px;height:16px;fill:white;margin-left:1px}
 .input-note{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px}
 
-/* ── CLARIFY CHIPS ── */
 .clarify-chips{
   display:flex;flex-wrap:wrap;gap:8px;
   margin-top:10px;
@@ -258,7 +248,6 @@ html,body{
 }
 .clarify-chip:hover{border-color:var(--orange);background:var(--surface2)}
 
-/* ── CTA STRIP ── */
 .cta-strip{
   margin-top:10px;
   padding-top:10px;
@@ -268,7 +257,6 @@ html,body{
 }
 .cta-strip:hover{color:var(--orange2)}
 
-/* ── NEXT STEPS CARD ── */
 .next-steps{
   margin-top:10px;
   background:#f9f9f9;
@@ -293,7 +281,6 @@ html,body{
   color:var(--text);
 }
 
-/* ── MOBILE ── */
 @media(max-width:480px){
   .header{padding:12px 16px}
   .msgs{padding:16px 14px 8px}
@@ -377,7 +364,8 @@ html,body{
 </div>
 
 <script>
-var WORKER = 'https://mortgage-ai.danisadj.workers.dev';
+// ── COPILOT WORKER URL ──
+var WORKER = 'https://copilot-worker-v2.danisadj.workers.dev';
 
 // ── EMAILJS CONFIG ──
 var EMAILJS_SERVICE  = 'service_6vsgzsk';
@@ -398,72 +386,36 @@ var state = {
   phase: 'idle'
 };
 
-// ── INTENT DETECTION — runs client-side before every API call ──
+// ── COPILOT SESSION STATE ──
+var copilot = { conversationId: null, token: null };
+
+// ── INTENT DETECTION ──
 function detectIntent(text) {
   var t = text.toLowerCase();
 
   var highSignals = [
-    /\$[\d,]+/,
-    /\d+k\b/,
-    /earn(ing)?\s+\d/,
-    /income.{0,20}\d/,
-    /salary.{0,20}\d/,
-    /looking at.{0,30}(property|house|place|apartment)/,
-    /want to buy.{0,30}(in|at|near)/,
-    /found (a |the )?(property|house|place)/,
-    /settlement/,
-    /auction/,
-    /\d+\s*(week|month)s?\s*(time|away|to buy)/,
-    /pre.?approv/,
-    /eligible/,
-    /first home (guarantee|grant)/,
-    /fhbg/,
-    /stamp duty/,
-    /knocked back/,
-    /declined/,
-    /rejected/,
-    /bank said no/,
-    /my (deposit|savings) (is|are)/,
-    /i have \$[\d,]+/,
-    /deposit of/,
-    /how much can i borrow/,
-    /borrowing (capacity|power)/,
-    /serviceability/,
-    /tax return.{0,20}(show|low|lodg)/,
-    /sole trader/,
-    /my business/,
-    /(maternity|parental) leave.{0,30}(borrow|loan|buy)/,
-    /return(ing)? to work/,
-    /investment property/,
-    /negative(ly)? gear/,
-    /equity.{0,20}(access|use|release)/,
-    /current rate.{0,20}(is|of|\d)/,
-    /paying.{0,20}(percent|%|\d)/,
-    /fix(ed)?.{0,20}expir/,
-    /cashback/,
-    /second property/,
-    /refinanc/,
+    /\$[\d,]+/,/\d+k\b/,/earn(ing)?\s+\d/,/income.{0,20}\d/,/salary.{0,20}\d/,
+    /looking at.{0,30}(property|house|place|apartment)/,/want to buy.{0,30}(in|at|near)/,
+    /found (a |the )?(property|house|place)/,/settlement/,/auction/,
+    /\d+\s*(week|month)s?\s*(time|away|to buy)/,/pre.?approv/,/eligible/,
+    /first home (guarantee|grant)/,/fhbg/,/stamp duty/,/knocked back/,/declined/,
+    /rejected/,/bank said no/,/my (deposit|savings) (is|are)/,/i have \$[\d,]+/,
+    /deposit of/,/how much can i borrow/,/borrowing (capacity|power)/,/serviceability/,
+    /tax return.{0,20}(show|low|lodg)/,/sole trader/,/my business/,
+    /(maternity|parental) leave.{0,30}(borrow|loan|buy)/,/return(ing)? to work/,
+    /investment property/,/negative(ly)? gear/,/equity.{0,20}(access|use|release)/,
+    /current rate.{0,20}(is|of|\d)/,/paying.{0,20}(percent|%|\d)/,
+    /fix(ed)?.{0,20}expir/,/cashback/,/second property/,/refinanc/,
   ];
-
   for (var i = 0; i < highSignals.length; i++) {
     if (highSignals[i].test(t)) return 'high';
   }
 
   var mediumSignals = [
-    /how much/,
-    /can i (get|borrow|qualify|afford)/,
-    /do i qualify/,
-    /am i eligible/,
-    /what do i need/,
-    /should i/,
-    /which (lender|bank|loan)/,
-    /my situation/,
-    /help me/,
-    /not sure/,
-    /worried/,
-    /stressed/,
+    /how much/,/can i (get|borrow|qualify|afford)/,/do i qualify/,/am i eligible/,
+    /what do i need/,/should i/,/which (lender|bank|loan)/,/my situation/,
+    /help me/,/not sure/,/worried/,/stressed/,
   ];
-
   for (var j = 0; j < mediumSignals.length; j++) {
     if (mediumSignals[j].test(t)) return 'medium';
   }
@@ -480,7 +432,6 @@ function setP(pct, label) {
   if (pctEl) pctEl.textContent = pct > 0 ? pct + '%' : '';
 }
 
-/* ── HELPERS ── */
 function scrollBottom() {
   var m = document.getElementById('msgs');
   m.scrollTop = m.scrollHeight;
@@ -491,26 +442,22 @@ function addBotMsg(text) {
   var row = document.createElement('div');
   row.className = 'msg bot';
 
-  // Split on citation block separator
   var parts = text.split(/\n?---\n?/);
   var mainText = parts[0];
   var citationText = parts.length > 1 ? parts.slice(1).join('\n---\n') : null;
 
-  // Also check for "Sources used" without --- separator
   if (!citationText && mainText.indexOf('Sources used') !== -1) {
     var srcIdx = mainText.indexOf('Sources used');
     citationText = mainText.slice(srcIdx);
     mainText = mainText.slice(0, srcIdx).trim();
   }
 
-  // Extract [CLARIFY:option1|option2] marker
   var clarifyOptions = null;
   mainText = mainText.replace(/\[CLARIFY:([^\]]+)\]/g, function(_, opts) {
     clarifyOptions = opts.split('|').map(function(o){ return o.trim(); });
     return '';
   }).trim();
 
-  // Extract [CTA] marker
   var hasCTA = false;
   var ctaText = '';
   mainText = mainText.replace(/\[CTA\]\s*(.+)/g, function(_, rest) {
@@ -519,7 +466,6 @@ function addBotMsg(text) {
     return '';
   }).trim();
 
-  // Extract [STEPS] block
   var stepsItems = null;
   var stepsMatch = mainText.match(/\[STEPS\]([\s\S]*?)(\[\/STEPS\]|$)/);
   if (stepsMatch) {
@@ -543,8 +489,6 @@ function addBotMsg(text) {
   if (citationText) {
     html += '<div class="citation-block">' + formatText(citationText.trim()) + '</div>';
   }
-
-  // Render next steps card inside bubble
   if (stepsItems && stepsItems.length) {
     html += '<div class="next-steps"><div class="next-steps-label">Next steps</div><ol>';
     stepsItems.forEach(function(step) {
@@ -552,8 +496,6 @@ function addBotMsg(text) {
     });
     html += '</ol></div>';
   }
-
-  // Render CTA strip inside bubble
   if (hasCTA && ctaText) {
     html += '<div class="cta-strip">' + formatText(ctaText) + ' →</div>';
   }
@@ -562,7 +504,6 @@ function addBotMsg(text) {
   row.innerHTML = '<div class="msg-av">D</div>' + html;
   m.appendChild(row);
 
-  // Render clarify chips below the message row
   if (clarifyOptions && clarifyOptions.length) {
     var chipWrap = document.createElement('div');
     chipWrap.className = 'clarify-chips';
@@ -624,39 +565,70 @@ function showGate() {
   scrollBottom();
 }
 
-/* ── AI CALL ── */
-function callAI(msgs, teaser, captured) {
-  return fetch(WORKER, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messages: msgs,
-      teaserMode: teaser || false,
-      leadCaptured: captured || false,
-      leadName: state.name,
-      activeModule: state.module,
-      intentSignal: state.lastIntent
-    })
-  })
-  .then(function(res) {
-    return res.json();
-  })
-  .then(function(d) {
-    if (d && d.content && d.content[0] && d.content[0].text) {
-      return d.content[0].text;
-    }
-    return null;
-  })
-  .catch(function(err) {
-    return 'Sorry, having trouble connecting right now. Please call Dan directly on 0433 362 754.';
-  });
+// ── START COPILOT SESSION ──
+function startCopilotSession() {
+  return fetch(WORKER + '/start', { method: 'POST' })
+    .then(function(res) { return res.json(); })
+    .then(function(d) {
+      if (d.error) throw new Error(d.error);
+      copilot.conversationId = d.conversationId;
+      copilot.token = d.token;
+    });
 }
 
-/* ── PROCESS MESSAGE ── */
+// ── MAIN AI CALL — hits Copilot via the proxy worker ──
+function callAI(msgs, teaser, captured) {
+  // Get the last user message text to send to Copilot
+  var lastUserMsg = '';
+  for (var i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role === 'user') {
+      lastUserMsg = msgs[i].content;
+      break;
+    }
+  }
+
+  function doChat() {
+    return fetch(WORKER + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        conversationId: copilot.conversationId,
+        token: copilot.token,
+        message: lastUserMsg
+      })
+    })
+    .then(function(res) {
+      // Session expired — restart and retry once
+      if (res.status === 401) {
+        copilot.conversationId = null;
+        copilot.token = null;
+        return startCopilotSession().then(doChat);
+      }
+      return res.json();
+    })
+    .then(function(d) {
+      if (d && d.reply) return d.reply;
+      return null;
+    })
+    .catch(function() {
+      return 'Sorry, having trouble connecting right now. Please call Dan directly on 0433 362 754.';
+    });
+  }
+
+  // Start session first if we don't have one
+  if (!copilot.conversationId) {
+    return startCopilotSession().then(doChat).catch(function() {
+      return 'Sorry, having trouble connecting right now. Please call Dan directly on 0433 362 754.';
+    });
+  }
+
+  return doChat();
+}
+
+// ── PROCESS MESSAGE ──
 function process(text, moduleOverride) {
   if (state.phase === 'gate') return;
 
-  // Set module if starter button specified one
   if (moduleOverride) state.module = moduleOverride;
 
   hideStarters();
@@ -665,17 +637,12 @@ function process(text, moduleOverride) {
   state.qc++;
   state.phase = 'chat';
 
-  // Store intent for email logging only — not used for gating anymore
   var intent = detectIntent(text);
   state.lastIntent = intent;
-
-  // Log this message
   state.log.push({ role: 'user', text: text, intent: intent, ts: Date.now() });
 
-  // ── GATE LOGIC: show gate after 4th answer ──
   var gateNow = !state.done && state.qc >= 4;
 
-  // ── POST-GATE LIMIT: stop chat after 2 more exchanges post lead capture ──
   if (state.done && state.postGateCount >= 2) {
     addBotMsg("You've covered a lot of ground! For anything more specific, Dan is best placed to help directly. Call him on 0433 362 754 or check your email — he'll be in touch soon.");
     setDis(true);
@@ -693,14 +660,10 @@ function process(text, moduleOverride) {
     hideTyping();
     if (!reply) return;
 
-    // Strip any accidental JSON intent tag from AI reply before displaying
-    var clean = reply.replace(/\s*\{"intent"[^}]*\}/g, '').trim();
+    addBotMsg(reply);
+    state.msgs.push({ role: 'assistant', content: reply });
+    state.log.push({ role: 'assistant', text: reply, ts: Date.now() });
 
-    addBotMsg(clean);
-    state.msgs.push({ role: 'assistant', content: clean });
-    state.log.push({ role: 'assistant', text: clean, ts: Date.now() });
-
-    // Increment post-gate counter
     if (state.done) state.postGateCount++;
 
     if (gateNow) {
@@ -712,7 +675,7 @@ function process(text, moduleOverride) {
   });
 }
 
-/* ── SEND ── */
+// ── SEND ──
 function doSend() {
   var inp = document.getElementById('inp');
   var text = inp.value.trim();
@@ -721,16 +684,15 @@ function doSend() {
   process(text);
 }
 
-/* ── EMAILJS INIT ── */
+// ── EMAILJS INIT ──
 (function(){
   if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_KEY);
 })();
 
-/* ── SEND LEAD EMAIL ── */
+// ── SEND LEAD EMAIL ──
 function sendLeadEmail(name, email, phone) {
   if (typeof emailjs === 'undefined') return;
 
-  // Build readable question list from log
   var questions = state.log
     .filter(function(e) { return e.role === 'user'; })
     .map(function(e, i) { return (i + 1) + '. ' + e.text; })
@@ -752,17 +714,19 @@ function sendLeadEmail(name, email, phone) {
   }[state.lastIntent] || state.lastIntent;
 
   emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-    lead_name:     name,
-    lead_email:    email,
-    lead_phone:    phone || 'Not provided',
-    lead_module:   moduleLabel,
-    lead_intent:   intentLabel,
+    lead_name:      name,
+    lead_email:     email,
+    lead_phone:     phone || 'Not provided',
+    lead_module:    moduleLabel,
+    lead_intent:    intentLabel,
     lead_questions: questions || 'No questions recorded',
-    lead_time:     new Date().toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' })
+    lead_time:      new Date().toLocaleString('en-AU', { timeZone: 'Australia/Melbourne' })
   }).catch(function(err) {
     console.error('EmailJS error:', err);
   });
 }
+
+// ── SUBMIT LEAD ──
 function submitLead() {
   var n = document.getElementById('g-name').value.trim();
   var e = document.getElementById('g-email').value.trim();
@@ -780,32 +744,18 @@ function submitLead() {
   document.getElementById('gate').style.display = 'none';
   setDis(false);
 
-  // Send email notification with full conversation
   sendLeadEmail(n, e, p);
 
-  // Send log to Worker (D1 if configured, otherwise silent)
-  fetch(WORKER, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      logOnly: true,
-      lead: { name: n, email: e, phone: p },
-      module: state.module,
-      log: state.log,
-      ts: new Date().toISOString()
-    })
-  }).catch(function(){});
-
-  state.msgs.push({ role: 'user', content: 'My name is ' + n + ', email ' + e + (p ? ', phone ' + p : '') + '. Please give me the full detailed answer now.' });
+  // Tell Copilot the user's name so it can personalise
+  state.msgs.push({ role: 'user', content: 'My name is ' + n + '. Please give me the full detailed answer now.' });
 
   setP(92, 'Preparing your full answer...');
   showTyping();
   callAI(state.msgs, false, true).then(function(reply) {
     hideTyping();
     if (reply) {
-      var clean = reply.replace(/\s*\{"intent"[^}]*\}/g, '').trim();
-      addBotMsg(clean);
-      state.msgs.push({ role: 'assistant', content: clean });
+      addBotMsg(reply);
+      state.msgs.push({ role: 'assistant', content: reply });
     }
     setP(100, 'Complete');
     setTimeout(function() {
@@ -814,10 +764,9 @@ function submitLead() {
   });
 }
 
-/* ── WIRE UP ── */
+// ── WIRE UP ──
 document.addEventListener('DOMContentLoaded', function() {
 
-  // Starter buttons
   document.getElementById('starters-grid').addEventListener('click', function(e) {
     var btn = e.target.closest('.starter');
     if (!btn) return;
@@ -826,12 +775,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (q) process(q, mod);
   });
 
-  // Send button
   document.getElementById('send-btn').addEventListener('click', function() {
     doSend();
   });
 
-  // Enter key
   document.getElementById('inp').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -839,12 +786,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Gate submit
   document.getElementById('gate-btn').addEventListener('click', function() {
     submitLead();
   });
 
-  // Gate enter key
   ['g-name','g-email','g-phone'].forEach(function(id) {
     document.getElementById(id).addEventListener('keydown', function(e) {
       if (e.key === 'Enter') submitLead();
