@@ -1,6 +1,6 @@
 {
+  "trailingSlash": true,
   "cleanUrls": false,
-  "trailingSlash": false,
   "headers": [
     {
       "source": "/sitemap.xml",
@@ -35,3 +35,10 @@
     }
   ]
 }
+```
+
+The key change is `"trailingSlash": true` — this tells Vercel to serve `/kb/` directly instead of redirecting to `/kb`.
+
+**After committing, test with:**
+```
+curl https://ai.danmortgagebroker.au/kb/
