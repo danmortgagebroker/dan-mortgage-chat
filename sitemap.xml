@@ -1,35 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-  <url>
-    <loc>https://ai.danmortgagebroker.au/kb/</loc>
-    <lastmod>2026-03-26</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
+<url>
+<loc>https://ai.danmortgagebroker.au/kb/</loc>
+<lastmod>2026-03-26</lastmod>
+<changefreq>monthly</changefreq>
+<priority>0.9</priority>
+</url>
 </urlset>
-```
-
-Click **Commit changes**.
-
----
-
-**Step 3 — Verify (60 seconds after Vercel auto-deploys)**
-
-Open in browser:
-- `https://ai.danmortgagebroker.au/robots.txt` → should show the text
-- `https://ai.danmortgagebroker.au/sitemap.xml` → should show the XML
-
----
-
-## Note on the split KB pages
-
-Once you're ready to add the split pages from the previous zip, they go here in GitHub:
-```
-kb/first-home-buyer.html     → type as filename: kb/first-home-buyer.html
-kb/borrowing-capacity.html
-kb/stamp-duty.html
-kb/self-employed.html
-kb/government-schemes.html
-kb/property-contracts.html
